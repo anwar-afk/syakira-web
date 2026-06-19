@@ -33,7 +33,8 @@ const DonationDetailPage = () => {
       try {
         // Ambil data campaign
         const campaignData = await getCampaigns();
-        const selectedCampaign = campaignData.find((campaign) => campaign._id === id);
+        const campaignsArray = Array.isArray(campaignData) ? campaignData : campaignData.data || [];
+        const selectedCampaign = campaignsArray.find((campaign) => campaign._id === id);
         if (selectedCampaign) {
           setCampaign(selectedCampaign);
         } else {
@@ -137,7 +138,7 @@ const DonationDetailPage = () => {
               {campaign.images.map((image, index) => (
                 <SwiperSlide key={index}>
                   <img
-                    src={`https://express-production-fac9.up.railway.app${image}`}
+                    src={`http://localhost:5000${image}`}
                     alt={`Campaign Image ${index + 1}`}
                     className="w-full h-64 lg:h-96 object-cover rounded-lg"
                   />

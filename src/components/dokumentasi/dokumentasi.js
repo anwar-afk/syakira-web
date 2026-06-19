@@ -27,7 +27,7 @@ const Album = () => {
     const fetchDocumentations = async () => {
       try {
         const response = await axios.get(
-          "https://express-production-fac9.up.railway.app/api/documentations"
+          "http://localhost:5000/api/documentations"
         );
         setDocumentations(response.data);
         setLoading(false);
@@ -186,7 +186,7 @@ const Album = () => {
                     {doc.images.map((image, index) => (
                       <SwiperSlide key={index}>
                         <img
-                          src={`https://express-production-fac9.up.railway.app${image}`}
+                          src={`http://localhost:5000${image}`}
                           alt={`${doc.title} - ${index + 1}`}
                           className="w-full h-48 object-cover"
                         />

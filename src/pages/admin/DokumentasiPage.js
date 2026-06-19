@@ -20,7 +20,7 @@ const DokumentasiPage = () => {
     const fetchDocumentations = async () => {
       try {
         const response = await axios.get(
-          "https://express-production-fac9.up.railway.app/api/documentations"
+          "http://localhost:5000/api/documentations"
         );
         setDocumentations(response.data); // Simpan data ke state
         setLoading(false); // Set loading ke false setelah data diterima
@@ -48,7 +48,7 @@ const DokumentasiPage = () => {
     try {
       const token = localStorage.getItem("token"); // Ambil token dari localStorage
       await axios.delete(
-        `https://express-production-fac9.up.railway.app/api/documentations/${documentationId}`,
+        `http://localhost:5000/api/documentations/${documentationId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`, // Tambahkan token ke header
@@ -99,7 +99,7 @@ const DokumentasiPage = () => {
                   {doc.images.map((image, index) => (
                     <SwiperSlide key={index}>
                       <img
-                        src={`https://express-production-fac9.up.railway.app${image}`}
+                        src={`http://localhost:5000${image}`}
                         alt={`Dokumentasi ${index + 1}`}
                         className="w-full h-48 object-cover"
                       />

@@ -1,7 +1,7 @@
 // services/statisticService.js
 import axios from 'axios';
 
-const baseUrl = 'https://express-production-fac9.up.railway.app/api';
+const baseUrl = 'http://localhost:5000/api';
 
 export const getStatistics = async () => {
   try {

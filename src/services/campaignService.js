@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://express-production-fac9.up.railway.app/api/campaigns'; // Sesuaikan dengan URL API Anda
+const API_URL = 'http://localhost:5000/api/campaigns'; // Sesuaikan dengan URL API Anda
 
 // Fungsi untuk mengambil semua campaign
 export const getCampaigns = async () => {

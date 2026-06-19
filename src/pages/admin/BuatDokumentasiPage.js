@@ -38,7 +38,7 @@ const BuatDokumentasiPage = () => {
 
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "https://express-production-fac9.up.railway.app/api/documentations",
+        "http://localhost:5000/api/documentations",
         formData,
         {
           headers: {

@@ -76,7 +76,8 @@ export const DonasiContent = () => {
       try {
         const data = await getCampaigns();
         console.log("Fetched Campaigns:", data);
-        setCampaigns(data);
+        const campaignsArray = Array.isArray(data) ? data : data.data || [];
+        setCampaigns(campaignsArray);
       } catch (error) {
         console.error("Error fetching campaigns:", error);
       }
@@ -152,7 +153,7 @@ const CampaignCard = ({ campaign }) => {
 
   // Ambil gambar pertama dari array images
   const firstImage = campaign.images && campaign.images.length > 0
-    ? `https://express-production-fac9.up.railway.app${campaign.images[0]}`
+    ? `http://localhost:5000${campaign.images[0]}`
     : "https://via.placeholder.com/150"; // Fallback image jika tidak ada gambar
 
   return (

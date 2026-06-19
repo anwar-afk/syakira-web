@@ -12,7 +12,7 @@ const ProgramPage = () => {
   const token = localStorage.getItem('token');
 
   // Base URL API
-  const baseUrl = 'https://express-production-fac9.up.railway.app';
+  const baseUrl = 'http://localhost:5000';
 
   // Fungsi untuk mengambil data campaigns
   const fetchCampaigns = async () => {
