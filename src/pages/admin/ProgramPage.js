@@ -25,7 +25,9 @@ const ProgramPage = () => {
           },
         }
       );
-      setCampaigns(response.data);
+      const responseData = response.data;
+      const campaignsArray = Array.isArray(responseData) ? responseData : responseData.campaigns || responseData.data || [];
+      setCampaigns(campaignsArray);
     } catch (error) {
       console.error('Error fetching campaigns:', error);
     }
@@ -63,7 +65,7 @@ const ProgramPage = () => {
   const handleUpdateProgram = async (data) => {
     try {
       const response = await axios.put(
-        `${baseUrl}/api/campaigns/${selectedProgram._id}`,
+        `${baseUrl}/api/campaigns/${selectedProgram.id || selectedProgram._id}`,
         data,
         {
           headers: {
@@ -137,7 +139,7 @@ const ProgramPage = () => {
           </thead>
           <tbody>
             {campaigns.map((campaign) => (
-              <tr key={campaign._id}>
+              <tr key={campaign.id || campaign._id}>
                 <td className="py-2 px-4 border-b">{campaign.title}</td>
                 <td className="py-2 px-4 border-b">
                   <div className="flex space-x-2">
@@ -163,7 +165,7 @@ const ProgramPage = () => {
                     Edit
                   </button>
                   <button
-                    onClick={() => handleDeleteProgram(campaign._id)}
+                    onClick={() => handleDeleteProgram(campaign.id || campaign._id)}
                     className="bg-red-500 text-white px-4 py-2 rounded-md"
                   >
                     Delete

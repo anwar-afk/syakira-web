@@ -33,7 +33,7 @@ const DonationDetailPage = () => {
       try {
         // Ambil data campaign
         const campaignData = await getCampaigns();
-        const campaignsArray = Array.isArray(campaignData) ? campaignData : campaignData.data || [];
+        const campaignsArray = Array.isArray(campaignData) ? campaignData : campaignData.campaigns || campaignData.data || [];
         const selectedCampaign = campaignsArray.find((campaign) => campaign._id === id);
         if (selectedCampaign) {
           setCampaign(selectedCampaign);

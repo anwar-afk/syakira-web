@@ -19,8 +19,8 @@ function FadeInComponent({ children }) {
   );
 }
 
-// Komponen Dokumentasi Carousel untuk Card Hero
-const DocumentationCarouselCard = () => {
+// Komponen Hero Pertama - Premium SaaS Style
+const Hero1 = () => {
   const [documentations, setDocumentations] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -44,66 +44,21 @@ const DocumentationCarouselCard = () => {
     fetchDocumentations();
   }, []);
 
-  if (loading)
-    return (
-      <div className="w-full aspect-[9/16] bg-gray-900 rounded-lg flex items-center justify-center">
-        <p className="text-gray-400 text-sm">Memuat...</p>
-      </div>
-    );
+  // Ekstrak semua gambar menjadi satu array flat dan batasi hanya 4 gambar
+  const allImages = documentations.flatMap((doc) =>
+    doc.images && doc.images.length > 0
+      ? doc.images.map((image) => ({ url: image, title: doc.title }))
+      : []
+  ).slice(0, 4);
 
-  return (
-    <>
-      {documentations.length > 0 ? (
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:gap-5 w-full aspect-auto lg:aspect-[4/3]">
-          {(() => {
-            // 1. Ekstrak semua gambar menjadi satu array flat dan batasi hanya 4 gambar
-            const allImages = documentations.flatMap((doc) =>
-              doc.images && doc.images.length > 0
-                ? doc.images.map((image) => ({ url: image, title: doc.title }))
-                : []
-            ).slice(0, 4);
+  // Tentukan class grid asimetris untuk masing-masing urutan gambar (Bento Box style)
+  const bentoClasses = [
+    "lg:col-span-3", // Gambar 1 (Kiri Atas): Lebih lebar
+    "lg:col-span-2", // Gambar 2 (Kanan Atas): Lebih sempit
+    "lg:col-span-2", // Gambar 3 (Kiri Bawah): Lebih sempit
+    "lg:col-span-3", // Gambar 4 (Kanan Bawah): Lebih lebar
+  ];
 
-            // Jika array kosong setelah di-flat
-            if (allImages.length === 0) {
-              return <div className="text-gray-500 col-span-full text-center">Tidak ada foto dokumentasi.</div>;
-            }
-
-            // 2. Tentukan class grid asimetris untuk masing-masing urutan gambar (Bento Box style)
-            const bentoClasses = [
-              "lg:col-span-3", // Gambar 1 (Kiri Atas): Lebih lebar
-              "lg:col-span-2", // Gambar 2 (Kanan Atas): Lebih sempit
-              "lg:col-span-2", // Gambar 3 (Kiri Bawah): Lebih sempit
-              "lg:col-span-3", // Gambar 4 (Kanan Bawah): Lebih lebar
-            ];
-
-            return allImages.map((imageObj, idx) => (
-              <div
-                key={idx}
-                className={`relative rounded-2xl overflow-hidden group min-h-[250px] lg:min-h-0 ${bentoClasses[idx] || "col-span-1"}`}
-              >
-                <img
-                  src={`http://localhost:5000${imageObj.url}`}
-                  alt={imageObj.title}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                {/* Opsional: Overlay gradient halus agar terlihat lebih premium */}
-                <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-300"></div>
-              </div>
-            ));
-          })()}
-        </div>
-      ) : (
-
-        <div className="w-full aspect-[9/16] bg-gray-800 rounded-lg flex items-center justify-center">
-          <p className="text-gray-500 text-sm">Tidak ada dokumentasi</p>
-        </div>
-      )}
-    </>
-  );
-};
-
-// Komponen Hero Pertama - Premium SaaS Style
-const Hero1 = () => {
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-emerald-50 px-6 py-20 overflow-hidden overflow-x-hidden">
       <div className="absolute inset-0 pointer-events-none">
@@ -166,17 +121,67 @@ const Hero1 = () => {
             </div>
           </div>
 
-          <div className="hidden lg:flex justify-center items-center">
-            <div className="relative w-full max-w-xs">
-              <DocumentationCarouselCard />
-            </div>
+          {/* Bento Box Highlight Dokumentasi - Desktop */}
+          <div className="hidden lg:block">
+            {loading ? (
+              <div className="grid grid-cols-5 gap-3 w-full">
+                {[3, 2, 2, 3].map((span, i) => (
+                  <div key={i} className={`col-span-${span} rounded-2xl bg-gray-200 h-[200px] animate-pulse`}></div>
+                ))}
+              </div>
+            ) : allImages.length > 0 ? (
+              <div className="grid grid-cols-5 gap-3 w-full">
+                {allImages.map((imageObj, idx) => (
+                  <div
+                    key={idx}
+                    className={`relative rounded-2xl overflow-hidden group h-[200px] shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer ${bentoClasses[idx] || "col-span-1"}`}
+                  >
+                    <img
+                      src={`http://localhost:5000${imageObj.url}`}
+                      alt={imageObj.title}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-300"></div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="w-full h-[300px] bg-gray-100 rounded-2xl flex items-center justify-center">
+                <p className="text-gray-400 text-sm">Belum ada dokumentasi</p>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="lg:hidden mt-12 flex justify-center">
-          <div className="relative w-full max-w-64">
-            <DocumentationCarouselCard />
-          </div>
+        {/* Bento Box Highlight Dokumentasi - Mobile */}
+        <div className="lg:hidden mt-12">
+          {loading ? (
+            <div className="grid grid-cols-2 gap-3 w-full">
+              {[1, 1, 1, 1].map((_, i) => (
+                <div key={i} className="rounded-2xl bg-gray-200 aspect-[4/3] animate-pulse"></div>
+              ))}
+            </div>
+          ) : allImages.length > 0 ? (
+            <div className="grid grid-cols-2 gap-3 w-full">
+              {allImages.map((imageObj, idx) => (
+                <div
+                  key={idx}
+                  className="relative rounded-2xl overflow-hidden group aspect-[4/3] shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer"
+                >
+                  <img
+                    src={`http://localhost:5000${imageObj.url}`}
+                    alt={imageObj.title}
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-300"></div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="w-full h-[200px] bg-gray-100 rounded-2xl flex items-center justify-center">
+              <p className="text-gray-400 text-sm">Belum ada dokumentasi</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -185,62 +190,7 @@ const Hero1 = () => {
 
 
 
-// Komponen Highlight Dokumentasi (Bento Box Style)
-const DocumentationHighlights = () => {
-  return (
-    <FadeInComponent>
-      <div className="px-4 md:px-10 lg:px-40 py-12 md:py-20 bg-gray-50/50">
-        <div className="text-center mb-8 md:mb-12 max-w-2xl mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-3">
-            Highlight Dokumentasi
-          </h2>
-          <p className="text-gray-600 text-sm md:text-base">
-            Momen-momen berharga dari kegiatan penyaluran bantuan, edukasi, dan aksi sosial kami di lapangan.
-          </p>
-        </div>
-
-        {/* Bento Box Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:gap-5 max-w-7xl mx-auto">
-          {/* Baris 1: Kiri (Lebar: col-span-3), Kanan (Sempit: col-span-2) */}
-          <div className="lg:col-span-3 rounded-2xl lg:rounded-3xl overflow-hidden bg-gray-200 aspect-[4/3] lg:aspect-auto lg:h-[350px] shadow-sm hover:shadow-xl hover:scale-[1.01] transition-all duration-300 group cursor-pointer">
-            <img
-              src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-              alt="Highlight Dokumentasi 1"
-              className="w-full h-full object-cover bg-gray-200 transition-transform duration-500 group-hover:scale-105"
-            />
-          </div>
-
-          <div className="lg:col-span-2 rounded-2xl lg:rounded-3xl overflow-hidden bg-gray-200 aspect-[4/3] lg:aspect-auto lg:h-[350px] shadow-sm hover:shadow-xl hover:scale-[1.01] transition-all duration-300 group cursor-pointer">
-            <img
-              src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-              alt="Highlight Dokumentasi 2"
-              className="w-full h-full object-cover bg-gray-200 transition-transform duration-500 group-hover:scale-105"
-            />
-          </div>
-
-          {/* Baris 2: Kiri (Sempit: col-span-2), Kanan (Lebar: col-span-3) */}
-          <div className="lg:col-span-2 rounded-2xl lg:rounded-3xl overflow-hidden bg-gray-200 aspect-[4/3] lg:aspect-auto lg:h-[350px] shadow-sm hover:shadow-xl hover:scale-[1.01] transition-all duration-300 group cursor-pointer">
-            <img
-              src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-              alt="Highlight Dokumentasi 3"
-              className="w-full h-full object-cover bg-gray-200 transition-transform duration-500 group-hover:scale-105"
-            />
-          </div>
-
-          <div className="lg:col-span-3 rounded-2xl lg:rounded-3xl overflow-hidden bg-gray-200 aspect-[4/3] lg:aspect-auto lg:h-[350px] shadow-sm hover:shadow-xl hover:scale-[1.01] transition-all duration-300 group cursor-pointer">
-            <img
-              src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-              alt="Highlight Dokumentasi 4"
-              className="w-full h-full object-cover bg-gray-200 transition-transform duration-500 group-hover:scale-105"
-            />
-          </div>
-        </div>
-      </div>
-    </FadeInComponent>
-  );
-};
-
-// Komponen Program Kerja
+// Komponen Program Kerja - Horizontal Scroll Carousel
 const ProgramKerja = () => {
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -250,9 +200,9 @@ const ProgramKerja = () => {
     const fetchCampaigns = async () => {
       try {
         const data = await getCampaigns();
-        const campaignsArray = Array.isArray(data) ? data : data.data || [];
+        const campaignsArray = Array.isArray(data) ? data : data.campaigns || data.data || [];
         const sortedCampaigns = campaignsArray.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        setCampaigns(sortedCampaigns.slice(0, 3));
+        setCampaigns(sortedCampaigns);
       } catch (err) {
         setError(err.message || 'Terjadi kesalahan saat mengambil data campaign');
       } finally {
@@ -262,44 +212,74 @@ const ProgramKerja = () => {
     fetchCampaigns();
   }, []);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return (
+    <div className="py-12 md:py-20 bg-white">
+      <div className="px-4 md:px-10 lg:px-40 mb-6">
+        <div className="h-8 bg-gray-200 rounded w-48 animate-pulse"></div>
+      </div>
+      <div className="flex gap-4 px-4 md:px-10 lg:px-40 overflow-hidden">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="flex-shrink-0" style={{ width: '180px' }}>
+            <div className="aspect-[2/3] bg-gray-200 rounded-2xl animate-pulse"></div>
+            <div className="h-4 bg-gray-200 rounded mt-3 w-3/4 animate-pulse"></div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
   if (error) return <div>Error: {error}</div>;
 
   return (
     <FadeInComponent>
-      <div className="px-4 md:px-10 lg:px-40 py-12 md:py-20 bg-white">
-        <div className="text-center mb-8 md:mb-10 max-w-2xl mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Program Kerja</h2>
-          <p className="text-gray-600 text-sm md:text-base">
-            The Nexcent blog is the best place to read about the latest membership insights.
+      <div className="py-12 md:py-20 bg-white">
+        {/* Header */}
+        <div className="px-4 md:px-10 lg:px-40 mb-6 md:mb-8">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800">Program Kerja</h2>
+          <p className="text-gray-500 text-sm md:text-base mt-1">
+            Program unggulan dan kegiatan sosial kami.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-10 px-4 md:px-0">
-          {campaigns.map((campaign) => {
-            // Ambil gambar pertama dari array images
+
+        {/* Horizontal Scroll Container */}
+        <div
+          className="flex gap-4 md:gap-5 px-4 md:px-10 lg:px-40 overflow-x-auto pb-4 scrollbar-hide"
+          style={{
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+          }}
+        >
+          {campaigns.map((campaign, index) => {
             const firstImage = campaign.images && campaign.images.length > 0
               ? `http://localhost:5000${campaign.images[0]}`
-              : "https://via.placeholder.com/150"; // Fallback image jika tidak ada gambar
+              : "https://via.placeholder.com/300x450";
 
             return (
               <Link
-                to={`/donation/${campaign._id}`}
-                key={campaign._id}
-                className="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
+                to={`/donation/${campaign.id || campaign._id}`}
+                key={campaign.id || campaign._id}
+                className="flex-shrink-0 group cursor-pointer"
+                style={{ width: '180px' }}
               >
-                <img
-                  src={firstImage}
-                  alt={campaign.title}
-                  className="w-full h-40 md:h-48 object-cover rounded-t-lg"
-                />
-                <div className="p-4 md:p-6">
-                  <h3 className="text-base md:text-lg font-semibold text-gray-800 mb-3 md:mb-4 line-clamp-2">{campaign.title}</h3>
-                  <p className="text-gray-600 mb-3 md:mb-4 text-sm md:text-base line-clamp-2">{campaign.detail}</p>
-                  <div className="flex flex-col gap-2 md:flex-row md:justify-between md:items-center">
-                    <span className="text-xs md:text-sm text-gray-500 truncate">Target: Rp {campaign.target.toLocaleString()}</span>
-                    <span className="text-xs md:text-sm text-gray-500 truncate">Terkumpul: Rp {campaign.currentAmount.toLocaleString()}</span>
-                  </div>
+                {/* Poster Image */}
+                <div
+                  className={`relative overflow-hidden rounded-2xl shadow-md group-hover:shadow-xl transition-all duration-300 group-hover:scale-[1.03] ${
+                    index === 0 ? 'aspect-[2/3]' : 'aspect-[2/3]'
+                  }`}
+                >
+                  <img
+                    src={firstImage}
+                    alt={campaign.title}
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                  {/* Gradient overlay di bagian bawah */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
+
+                {/* Title */}
+                <p className="mt-2.5 text-sm font-medium text-gray-700 group-hover:text-green-600 transition-colors duration-200 line-clamp-1 px-0.5">
+                  {campaign.title}
+                </p>
               </Link>
             );
           })}
@@ -314,7 +294,6 @@ const HomePage = () => {
   return (
     <div>
       <Hero1 />
-      <DocumentationHighlights />
       <ProgramKerja />
     </div>
   );

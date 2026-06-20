@@ -76,7 +76,7 @@ export const DonasiContent = () => {
       try {
         const data = await getCampaigns();
         console.log("Fetched Campaigns:", data);
-        const campaignsArray = Array.isArray(data) ? data : data.data || [];
+        const campaignsArray = Array.isArray(data) ? data : data.campaigns || data.data || [];
         setCampaigns(campaignsArray);
       } catch (error) {
         console.error("Error fetching campaigns:", error);
