@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useSpring, animated, useInView } from '@react-spring/web';
+import axios from 'axios';
 import { getCampaigns } from '../../services/campaignService';
-import { getStatistics } from '../../services/statisticService'; // Import service untuk statistik
 
 function FadeInComponent({ children }) {
   const [ref, inView] = useInView({ threshold: 0.2 });
@@ -19,17 +19,100 @@ function FadeInComponent({ children }) {
   );
 }
 
+// Komponen Dokumentasi Carousel untuk Card Hero
+const DocumentationCarouselCard = () => {
+  const [documentations, setDocumentations] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDocumentations = async () => {
+      try {
+        const response = await axios.get(
+          'http://localhost:5000/api/documentations'
+        );
+        const sortedDocs = response.data
+          .sort((a, b) => new Date(b.date) - new Date(a.date))
+          .slice(0, 5);
+        setDocumentations(sortedDocs);
+      } catch (err) {
+        console.error('Error fetching documentations:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDocumentations();
+  }, []);
+
+  if (loading)
+    return (
+      <div className="w-full aspect-[9/16] bg-gray-900 rounded-lg flex items-center justify-center">
+        <p className="text-gray-400 text-sm">Memuat...</p>
+      </div>
+    );
+
+  return (
+    <>
+      {documentations.length > 0 ? (
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:gap-5 w-full aspect-auto lg:aspect-[4/3]">
+          {(() => {
+            // 1. Ekstrak semua gambar menjadi satu array flat dan batasi hanya 4 gambar
+            const allImages = documentations.flatMap((doc) =>
+              doc.images && doc.images.length > 0
+                ? doc.images.map((image) => ({ url: image, title: doc.title }))
+                : []
+            ).slice(0, 4);
+
+            // Jika array kosong setelah di-flat
+            if (allImages.length === 0) {
+              return <div className="text-gray-500 col-span-full text-center">Tidak ada foto dokumentasi.</div>;
+            }
+
+            // 2. Tentukan class grid asimetris untuk masing-masing urutan gambar (Bento Box style)
+            const bentoClasses = [
+              "lg:col-span-3", // Gambar 1 (Kiri Atas): Lebih lebar
+              "lg:col-span-2", // Gambar 2 (Kanan Atas): Lebih sempit
+              "lg:col-span-2", // Gambar 3 (Kiri Bawah): Lebih sempit
+              "lg:col-span-3", // Gambar 4 (Kanan Bawah): Lebih lebar
+            ];
+
+            return allImages.map((imageObj, idx) => (
+              <div
+                key={idx}
+                className={`relative rounded-2xl overflow-hidden group min-h-[250px] lg:min-h-0 ${bentoClasses[idx] || "col-span-1"}`}
+              >
+                <img
+                  src={`http://localhost:5000${imageObj.url}`}
+                  alt={imageObj.title}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                {/* Opsional: Overlay gradient halus agar terlihat lebih premium */}
+                <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-300"></div>
+              </div>
+            ));
+          })()}
+        </div>
+      ) : (
+
+        <div className="w-full aspect-[9/16] bg-gray-800 rounded-lg flex items-center justify-center">
+          <p className="text-gray-500 text-sm">Tidak ada dokumentasi</p>
+        </div>
+      )}
+    </>
+  );
+};
+
 // Komponen Hero Pertama - Premium SaaS Style
 const Hero1 = () => {
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-emerald-50 px-6 py-20 overflow-hidden">
+    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-emerald-50 px-6 py-20 overflow-hidden overflow-x-hidden">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-green-500/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-20 right-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl"></div>
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12 lg:gap-20 items-center">
           <div className="space-y-8">
             <div>
               <div className="inline-block mb-4">
@@ -37,20 +120,20 @@ const Hero1 = () => {
                   ✨ Bersama Kita Bisa Berubah
                 </span>
               </div>
-              <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight tracking-tight">
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight tracking-tight">
                 Mewujudkan <span className="bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent">Harapan</span>, <br />
                 Memberi <span className="bg-gradient-to-r from-emerald-600 to-green-500 bg-clip-text text-transparent">Kehidupan Baru</span>
               </h1>
             </div>
 
             <div>
-              <p className="text-lg text-gray-600 leading-relaxed max-w-lg">
+              <p className="text-base md:text-lg text-gray-600 leading-relaxed max-w-lg">
                 Setiap donasi Anda adalah langkah kecil menuju perubahan besar. Bergabunglah dengan ribuan orang yang peduli dalam misi kebaikan untuk membantu mereka yang membutuhkan.
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <Link to="/donasi" className="group relative px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-green-500/50 transform hover:scale-105 text-center">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
+              <Link to="/donasi" className="group relative px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-green-500/50 transform hover:scale-105 text-center text-sm sm:text-base">
                 <span className="flex items-center justify-center gap-2">
                   Mulai Donasi
                   <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -58,7 +141,7 @@ const Hero1 = () => {
                   </svg>
                 </span>
               </Link>
-              <button className="group relative px-8 py-4 bg-white/80 hover:bg-white text-green-600 font-semibold rounded-lg border-2 border-green-500/30 hover:border-green-500 transition-all duration-300 backdrop-blur-sm hover:backdrop-blur shadow-md hover:shadow-lg">
+              <button className="group relative px-6 sm:px-8 py-3 sm:py-4 bg-white/80 hover:bg-white text-green-600 font-semibold rounded-lg border-2 border-green-500/30 hover:border-green-500 transition-all duration-300 backdrop-blur-sm hover:backdrop-blur shadow-md hover:shadow-lg text-sm sm:text-base">
                 <span className="flex items-center justify-center gap-2">
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
@@ -84,71 +167,15 @@ const Hero1 = () => {
           </div>
 
           <div className="hidden lg:flex justify-center items-center">
-            <div className="relative w-full max-w-md">
-              <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl blur-2xl opacity-30 animate-pulse"></div>
-              <div className="relative bg-gradient-to-br from-white to-green-50 rounded-2xl shadow-2xl overflow-hidden border border-green-100/50 backdrop-blur">
-                <div className="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-8 text-white">
-                  <h3 className="text-2xl font-bold mb-2">Program Donasi Kami</h3>
-                  <p className="text-green-100">Dampak nyata untuk kehidupan yang lebih baik</p>
-                </div>
-
-                <div className="p-8 space-y-6">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-                      <p className="text-3xl font-bold text-green-600">5K+</p>
-                      <p className="text-gray-600 text-sm mt-1">Donatur Aktif</p>
-                    </div>
-                    <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
-                      <p className="text-3xl font-bold text-emerald-600">50+</p>
-                      <p className="text-gray-600 text-sm mt-1">Program Sosial</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <p className="text-sm font-semibold text-gray-700">Program Unggulan:</p>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <p className="text-gray-700">Pendidikan Anak Kurang Mampu</p>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                        <p className="text-gray-700">Bantuan Kesehatan Masyarakat</p>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
-                        <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                        <p className="text-gray-700">Penanggulangan Bencana Alam</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-lg p-4 border border-green-200">
-                    <p className="text-2xl font-bold text-green-600">Rp. 2.5 Miliar</p>
-                    <p className="text-gray-600 text-sm mt-1">Dana Terkumpul Tahun Ini</p>
-                  </div>
-                </div>
-
-                <div className="absolute -top-4 -right-4 w-20 h-20 bg-green-500/20 rounded-full blur-xl"></div>
-                <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-emerald-500/20 rounded-full blur-xl"></div>
-              </div>
-              <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl animate-pulse"></div>
+            <div className="relative w-full max-w-xs">
+              <DocumentationCarouselCard />
             </div>
           </div>
         </div>
 
         <div className="lg:hidden mt-12 flex justify-center">
-          <div className="relative w-full max-w-xs">
-            <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-500 rounded-3xl blur-2xl opacity-20"></div>
-            <div className="relative bg-gradient-to-br from-white to-green-50 rounded-3xl shadow-2xl overflow-hidden border border-green-100/50 p-6 space-y-4">
-              <div className="h-8 bg-gradient-to-r from-green-500 to-emerald-600 rounded w-2/3"></div>
-              <div className="h-3 bg-gray-300 rounded"></div>
-              <div className="h-3 bg-gray-300 rounded w-5/6"></div>
-              <div className="h-12 bg-green-100 rounded mt-4 border-2 border-green-300"></div>
-              <div className="space-y-2 pt-4">
-                <div className="h-2 bg-gray-300 rounded"></div>
-                <div className="h-2 bg-gray-300 rounded w-4/5"></div>
-              </div>
-            </div>
+          <div className="relative w-full max-w-64">
+            <DocumentationCarouselCard />
           </div>
         </div>
       </div>
@@ -156,66 +183,56 @@ const Hero1 = () => {
   );
 };
 
-// Komponen Summary
-const Summary = () => {
-  const [statistics, setStatistics] = useState({
-    totalSuccessfulDonations: 0,
-    totalRegisteredUsers: 0,
-  });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchStatistics = async () => {
-      try {
-        const data = await getStatistics(); // Ambil data statistik
-        setStatistics({
-          totalSuccessfulDonations: data.totalSuccessfulDonations,
-          totalRegisteredUsers: data.totalRegisteredUsers,
-        });
-      } catch (err) {
-        setError(err.message || 'Gagal mengambil data statistik');
-      } finally {
-        setLoading(false);
-      }
-    };
 
-    fetchStatistics();
-  }, []);
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
-
+// Komponen Highlight Dokumentasi (Bento Box Style)
+const DocumentationHighlights = () => {
   return (
     <FadeInComponent>
-      <div className="bg-green-100 px-10 lg:px-40 py-20 flex flex-col lg:flex-row items-center lg:justify-between">
-        <div className="lg:max-w-md mb-10 lg:mb-0">
-          <h2 className="text-3xl font-bold text-gray-800">
-            Bantu Donasi <br />
-            <span className="text-green-500">Yayasan Kami</span>
+      <div className="px-4 md:px-10 lg:px-40 py-12 md:py-20 bg-gray-50/50">
+        <div className="text-center mb-8 md:mb-12 max-w-2xl mx-auto px-4">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-3">
+            Highlight Dokumentasi
           </h2>
-          <p className="text-gray-600 text-lg mt-2">
-            We reached here with our hard work and dedication
+          <p className="text-gray-600 text-sm md:text-base">
+            Momen-momen berharga dari kegiatan penyaluran bantuan, edukasi, dan aksi sosial kami di lapangan.
           </p>
         </div>
-        <div className="flex flex-col lg:flex-row items-center lg:space-x-10">
-          <div className="flex items-center space-x-4">
-            <img src="/image/ic-hero3.svg" alt="Donatur Icon" />
-            <div>
-              <p className="text-3xl font-bold text-gray-800">
-                {statistics.totalSuccessfulDonations.toLocaleString()}
-              </p>
-              <p className="text-gray-600">Donatur</p>
-            </div>
+
+        {/* Bento Box Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:gap-5 max-w-7xl mx-auto">
+          {/* Baris 1: Kiri (Lebar: col-span-3), Kanan (Sempit: col-span-2) */}
+          <div className="lg:col-span-3 rounded-2xl lg:rounded-3xl overflow-hidden bg-gray-200 aspect-[4/3] lg:aspect-auto lg:h-[350px] shadow-sm hover:shadow-xl hover:scale-[1.01] transition-all duration-300 group cursor-pointer">
+            <img
+              src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+              alt="Highlight Dokumentasi 1"
+              className="w-full h-full object-cover bg-gray-200 transition-transform duration-500 group-hover:scale-105"
+            />
           </div>
-          <div className="flex items-center space-x-4 mt-8 lg:mt-0">
-            <img src="/image/hand-ic-hero3.svg" alt="Komunitas Icon" />
-            <div>
-              <p className="text-3xl font-bold text-gray-800">
-                {statistics.totalRegisteredUsers.toLocaleString()}
-              </p>
-              <p className="text-gray-600">Komunitas</p>
-            </div>
+
+          <div className="lg:col-span-2 rounded-2xl lg:rounded-3xl overflow-hidden bg-gray-200 aspect-[4/3] lg:aspect-auto lg:h-[350px] shadow-sm hover:shadow-xl hover:scale-[1.01] transition-all duration-300 group cursor-pointer">
+            <img
+              src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+              alt="Highlight Dokumentasi 2"
+              className="w-full h-full object-cover bg-gray-200 transition-transform duration-500 group-hover:scale-105"
+            />
+          </div>
+
+          {/* Baris 2: Kiri (Sempit: col-span-2), Kanan (Lebar: col-span-3) */}
+          <div className="lg:col-span-2 rounded-2xl lg:rounded-3xl overflow-hidden bg-gray-200 aspect-[4/3] lg:aspect-auto lg:h-[350px] shadow-sm hover:shadow-xl hover:scale-[1.01] transition-all duration-300 group cursor-pointer">
+            <img
+              src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+              alt="Highlight Dokumentasi 3"
+              className="w-full h-full object-cover bg-gray-200 transition-transform duration-500 group-hover:scale-105"
+            />
+          </div>
+
+          <div className="lg:col-span-3 rounded-2xl lg:rounded-3xl overflow-hidden bg-gray-200 aspect-[4/3] lg:aspect-auto lg:h-[350px] shadow-sm hover:shadow-xl hover:scale-[1.01] transition-all duration-300 group cursor-pointer">
+            <img
+              src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+              alt="Highlight Dokumentasi 4"
+              className="w-full h-full object-cover bg-gray-200 transition-transform duration-500 group-hover:scale-105"
+            />
           </div>
         </div>
       </div>
@@ -250,14 +267,14 @@ const ProgramKerja = () => {
 
   return (
     <FadeInComponent>
-      <div className="px-10 lg:px-40 py-20 bg-white">
-        <div className="text-center mb-10 max-w-2xl mx-auto">
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">Program Kerja</h2>
-          <p className="text-gray-600">
+      <div className="px-4 md:px-10 lg:px-40 py-12 md:py-20 bg-white">
+        <div className="text-center mb-8 md:mb-10 max-w-2xl mx-auto px-4">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Program Kerja</h2>
+          <p className="text-gray-600 text-sm md:text-base">
             The Nexcent blog is the best place to read about the latest membership insights.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-10 px-4 md:px-0">
           {campaigns.map((campaign) => {
             // Ambil gambar pertama dari array images
             const firstImage = campaign.images && campaign.images.length > 0
@@ -273,14 +290,14 @@ const ProgramKerja = () => {
                 <img
                   src={firstImage}
                   alt={campaign.title}
-                  className="w-full h-48 object-cover rounded-t-lg"
+                  className="w-full h-40 md:h-48 object-cover rounded-t-lg"
                 />
-                <div className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">{campaign.title}</h3>
-                  <p className="text-gray-600 mb-4">{campaign.detail}</p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-500">Target: Rp {campaign.target.toLocaleString()}</span>
-                    <span className="text-sm text-gray-500">Terkumpul: Rp {campaign.currentAmount.toLocaleString()}</span>
+                <div className="p-4 md:p-6">
+                  <h3 className="text-base md:text-lg font-semibold text-gray-800 mb-3 md:mb-4 line-clamp-2">{campaign.title}</h3>
+                  <p className="text-gray-600 mb-3 md:mb-4 text-sm md:text-base line-clamp-2">{campaign.detail}</p>
+                  <div className="flex flex-col gap-2 md:flex-row md:justify-between md:items-center">
+                    <span className="text-xs md:text-sm text-gray-500 truncate">Target: Rp {campaign.target.toLocaleString()}</span>
+                    <span className="text-xs md:text-sm text-gray-500 truncate">Terkumpul: Rp {campaign.currentAmount.toLocaleString()}</span>
                   </div>
                 </div>
               </Link>
@@ -297,6 +314,7 @@ const HomePage = () => {
   return (
     <div>
       <Hero1 />
+      <DocumentationHighlights />
       <ProgramKerja />
     </div>
   );
