@@ -1,10 +1,16 @@
-import React, { useContext, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useContext, useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
+
+  // Tutup menu mobile setiap kali pindah halaman
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [location]);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -17,79 +23,138 @@ const Navbar = () => {
     }
   };
 
+  // Daftar navigasi untuk memudahkan mapping
+  const navLinks = [
+    { name: 'Home', path: '/' },
+    { name: 'Donasi', path: '/donasi' },
+    { name: 'Dokumentasi', path: '/dokumentasi' },
+    { name: 'Laporan', path: '/laporan' },
+    { name: 'Tentang', path: '/tentang' },
+  ];
+
   return (
-    <nav className="flex flex-wrap items-center justify-between px-6 lg:px-36 py-4 bg-white border-b border-gray-200 drop-shadow-lg relative z-50">
-      {/* Logo Section */}
-      <div className="flex items-center space-x-2">
-        <img
-          src="/logo.svg"
-          alt="Yayasan Pelita Ilmu"
-          className="h-8 w-8"
-        />
-        <div>
-          <h1 className="text-lg font-bold text-gray-800">Yayasan</h1>
-          <p className="text-sm text-gray-600">Syakira Berkah</p>
-        </div>
-      </div>
-
-      {/* Hamburger Menu for Mobile */}
-      <div className="lg:hidden">
-        <button onClick={toggleMenu} className="text-gray-800 focus:outline-none">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
-          </svg>
-        </button>
-      </div>
-
-      {/* Navigation Links - Centered */}
-      <div className={`${isMenuOpen ? 'block' : 'hidden'} w-full lg:flex lg:items-center lg:justify-center lg:space-x-8 lg:w-auto mt-4 lg:mt-0`}>
-        <Link to="/" className="block lg:inline-block text-gray-800 hover:text-green-500 py-2 lg:py-0">
-          Home
-        </Link>
-        <Link to="/donasi" className="block lg:inline-block text-gray-800 hover:text-green-500 py-2 lg:py-0">
-          Donasi
-        </Link>
-        <Link to="/dokumentasi" className="block lg:inline-block text-gray-800 hover:text-green-500 py-2 lg:py-0">
-          Dokumentasi
-        </Link>
-        <Link to="/laporan" className="block lg:inline-block text-gray-800 hover:text-green-500 py-2 lg:py-0">
-          Laporan
-        </Link>
-        <Link to="/tentang" className="block lg:inline-block text-gray-800 hover:text-green-500 py-2 lg:py-0">
-          Tentang
-        </Link>
-      </div>
-
-      {/* Auth Buttons - Right */}
-      <div className={`${isMenuOpen ? 'block' : 'hidden'} w-full lg:flex lg:items-center lg:space-x-4 lg:w-auto mt-4 lg:mt-0`}>
-        {user ? (
-          <div className="flex items-center space-x-4">
-            <span className="text-gray-800">{user.username}</span>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-300"
-            >
-              keluar
-            </button>
+    /* WRAPPER LUAR: Membuat navbar mengambang di tengah (Fixed, Top-4) */
+    <div className="fixed top-4 left-0 right-0 z-50 flex justify-center px-4 sm:px-6">
+      
+      {/* NAVBAR PILL (KAPSUL): Glassmorphism, shadow, rounded-full */}
+      <nav className="flex items-center justify-between w-full max-w-5xl px-3 py-2.5 bg-white/80 backdrop-blur-md border border-gray-200/60 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.08)] relative">
+        
+        {/* Kiri: Logo & Nama */}
+        <Link to="/" className="flex items-center space-x-2.5 pl-2">
+          <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
+            <img src="/logo.svg" alt="Yayasan Syakira Berkah" className="h-5 w-5 object-contain" />
           </div>
-        ) : (
-          <>
-            <Link 
-              to="/login"
-              className="block lg:inline-block text-green-500 hover:text-green-600 font-medium py-2 lg:py-0"
-            >
-              Login
-            </Link>
+          <span className="text-base font-bold text-gray-900 tracking-tight hidden sm:block">
+            Syakira Berkah
+          </span>
+        </Link>
+
+        {/* Tengah: Navigation Links (Desktop) */}
+        <div className="hidden lg:flex items-center space-x-1">
+          {navLinks.map((link) => (
             <Link
-              to="/register"
-              className="block lg:inline-block px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-300"
+              key={link.name}
+              to={link.path}
+              className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-all duration-200"
             >
-              Sign Up
+              {link.name}
             </Link>
-          </>
-        )}
-      </div>
-    </nav>
+          ))}
+        </div>
+
+        {/* Kanan: Auth Buttons (Desktop) */}
+        <div className="hidden lg:flex items-center space-x-2 pr-1">
+          {user ? (
+            <div className="flex items-center space-x-3">
+              <span className="text-sm font-medium text-gray-700 px-2">{user.username}</span>
+              <button
+                onClick={handleLogout}
+                className="px-5 py-2.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-full transition-all duration-200"
+              >
+                Keluar
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* Login berbentuk teks (Ghost Button) */}
+              <Link
+                to="/login"
+                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Sign in
+              </Link>
+              {/* Sign Up berbentuk pil hitam (Solid Black Button) */}
+              <Link
+                to="/register"
+                className="px-5 py-2.5 text-sm font-medium text-white bg-gray-900 hover:bg-black rounded-full transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+              >
+                Sign Up
+              </Link>
+            </>
+          )}
+        </div>
+
+        {/* Hamburger Menu (Mobile) */}
+        <div className="lg:hidden pr-2">
+          <button 
+            onClick={toggleMenu} 
+            className="p-2 text-gray-600 hover:bg-gray-100 rounded-full focus:outline-none transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {isMenuOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
+              )}
+            </svg>
+          </button>
+        </div>
+      </nav>
+
+      {/* DROPDOWN MENU (Mobile) - Muncul sebagai card melayang di bawah kapsul navbar */}
+      {isMenuOpen && (
+        <div className="absolute top-20 left-4 right-4 bg-white/95 backdrop-blur-xl border border-gray-100 rounded-3xl shadow-xl overflow-hidden lg:hidden flex flex-col p-4 space-y-1 z-50">
+          {navLinks.map((link) => (
+            <Link
+              key={link.name}
+              to={link.path}
+              className="px-4 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-2xl transition-colors"
+            >
+              {link.name}
+            </Link>
+          ))}
+          
+          <div className="h-px bg-gray-100 my-3"></div>
+          
+          {user ? (
+            <div className="flex flex-col space-y-2">
+              <span className="px-4 py-2 text-sm font-medium text-gray-700 text-center">Hi, {user.username}</span>
+              <button
+                onClick={handleLogout}
+                className="w-full px-4 py-3 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-2xl transition-colors text-center"
+              >
+                Keluar
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col space-y-2">
+              <Link
+                to="/login"
+                className="w-full px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-2xl transition-colors text-center"
+              >
+                Sign in
+              </Link>
+              <Link
+                to="/register"
+                className="w-full px-4 py-3 text-sm font-medium text-white bg-gray-900 hover:bg-black rounded-2xl transition-colors text-center"
+              >
+                Sign Up
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 };
 

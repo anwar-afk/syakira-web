@@ -2,27 +2,30 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:5000/api'; // Sesuaikan dengan URL API Anda
 
-// Fungsi untuk membuat donasi
-export const createDonation = async (campaignId, amount) => {
+// Fungsi untuk membuat donasi (guest atau user login)
+export const createDonation = async (campaignId, donationData) => {
   try {
+    const token = localStorage.getItem('token');
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
     const response = await axios.post(
       `${API_URL}/donate`,
       {
-        campaignId, // ID campaign yang sedang dibuka
-        amount: parseInt(amount), // Konversi amount ke number
+        campaignId,
+        amount: parseInt(donationData.amount, 10),
+        name: donationData.name,
+        email: donationData.email,
       },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`, // Jika memerlukan token
-        },
-      }
+      { headers }
     );
 
-    return response.data; // Mengembalikan respons dari API
+    return response.data;
   } catch (error) {
     console.error("Error creating donation:", error);
-    throw error.response?.data || "Terjadi kesalahan saat membuat donasi."; // Lempar error untuk ditangani di komponen
+    throw error.response?.data || "Terjadi kesalahan saat membuat donasi.";
   }
 };
 

@@ -19,182 +19,156 @@ function FadeInComponent({ children }) {
   );
 }
 
-// Komponen Hero Pertama - Premium SaaS Style
+// Helper untuk generate angka acak
+const getRandomInRange = (min, max) => Math.random() * (max - min) + min;
+
+// Fungsi untuk posisi acak di sudut dalam CARD
+const generateCornerPositions = () => {
+  return [
+    { top: `${getRandomInRange(4, 22)}%`, left: `${getRandomInRange(4, 15)}%` },
+    { top: `${getRandomInRange(4, 22)}%`, right: `${getRandomInRange(4, 15)}%` },
+    { bottom: `${getRandomInRange(4, 22)}%`, left: `${getRandomInRange(4, 15)}%` },
+    { bottom: `${getRandomInRange(4, 22)}%`, right: `${getRandomInRange(4, 15)}%` },
+  ];
+};
+
+// Komponen Hero Pertama
 const Hero1 = () => {
-  const [documentations, setDocumentations] = useState([]);
+  const [imagePool, setImagePool] = useState([]); 
+  const [activeSlots, setActiveSlots] = useState([]); 
+  const [isVisible, setIsVisible] = useState(false); 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchDocumentations = async () => {
       try {
-        const response = await axios.get(
-          'http://localhost:5000/api/documentations'
+        const response = await axios.get('http://localhost:5000/api/documentations');
+        const pool = response.data.flatMap((doc) =>
+          doc.images && doc.images.length > 0
+            ? doc.images.map((image) => ({ url: image, title: doc.title }))
+            : []
         );
-        const sortedDocs = response.data
-          .sort((a, b) => new Date(b.date) - new Date(a.date))
-          .slice(0, 5);
-        setDocumentations(sortedDocs);
+        setImagePool(pool);
       } catch (err) {
         console.error('Error fetching documentations:', err);
       } finally {
         setLoading(false);
       }
     };
-
     fetchDocumentations();
   }, []);
 
-  // Ekstrak semua gambar menjadi satu array flat dan batasi hanya 4 gambar
-  const allImages = documentations.flatMap((doc) =>
-    doc.images && doc.images.length > 0
-      ? doc.images.map((image) => ({ url: image, title: doc.title }))
-      : []
-  ).slice(0, 4);
+  const randomizePhotosAndPositions = () => {
+    if (imagePool.length === 0) return;
+    const randomPositions = generateCornerPositions();
+    let selectedPhotos = [];
+    let shuffled = [...imagePool].sort(() => 0.5 - Math.random());
+    
+    for(let i = 0; i < 4; i++) {
+      selectedPhotos.push(shuffled[i % shuffled.length]);
+    }
 
-  // Tentukan class grid asimetris untuk masing-masing urutan gambar (Bento Box style)
-  const bentoClasses = [
-    "lg:col-span-3", // Gambar 1 (Kiri Atas): Lebih lebar
-    "lg:col-span-2", // Gambar 2 (Kanan Atas): Lebih sempit
-    "lg:col-span-2", // Gambar 3 (Kiri Bawah): Lebih sempit
-    "lg:col-span-3", // Gambar 4 (Kanan Bawah): Lebih lebar
-  ];
+    const nextActiveSlots = selectedPhotos.map((photo, i) => ({
+      ...photo,
+      id: i, 
+      position: randomPositions[i], 
+    }));
+    setActiveSlots(nextActiveSlots);
+  };
+
+  useEffect(() => {
+    if (loading || imagePool.length === 0) return;
+    if (activeSlots.length === 0) {
+      randomizePhotosAndPositions();
+      setTimeout(() => setIsVisible(true), 100); 
+    }
+    const interval = setInterval(() => {
+      setIsVisible(false);
+      setTimeout(() => {
+        randomizePhotosAndPositions();
+        setIsVisible(true);
+      }, 600); 
+    }, 4000); 
+    return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, imagePool]); 
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-emerald-50 px-6 py-20 overflow-hidden overflow-x-hidden">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-green-500/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 right-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl"></div>
-      </div>
+    <div className="w-full bg-white px-4 sm:px-6 lg:px-10 py-6 lg:py-10 block">
+      <div className="relative min-h-[80vh] md:min-h-[85vh] lg:min-h-[90vh] w-full flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-emerald-50 px-6 py-20 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden border border-gray-100">
+        <div className="absolute inset-0 pointer-events-none z-0">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-green-500/10 rounded-full blur-3xl opacity-60"></div>
+          <div className="absolute bottom-20 right-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl opacity-60"></div>
+        </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12 lg:gap-20 items-center">
-          <div className="space-y-8">
-            <div>
-              <div className="inline-block mb-4">
-                <span className="px-4 py-2 bg-green-500/20 border border-green-500/50 rounded-full text-green-700 text-sm font-medium">
-                  ✨ Bersama Kita Bisa Berubah
-                </span>
-              </div>
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight tracking-tight">
-                Mewujudkan <span className="bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent">Harapan</span>, <br />
-                Memberi <span className="bg-gradient-to-r from-emerald-600 to-green-500 bg-clip-text text-transparent">Kehidupan Baru</span>
-              </h1>
-            </div>
+        <div 
+          className="absolute inset-0 z-0 pointer-events-none"
+          style={{
+            backgroundImage: 'radial-gradient(rgba(16, 185, 129, 0.4) 1px, transparent 1px)',
+            backgroundSize: '16px 16px',
+          }}
+        ></div>
 
-            <div>
-              <p className="text-base md:text-lg text-gray-600 leading-relaxed max-w-lg">
-                Setiap donasi Anda adalah langkah kecil menuju perubahan besar. Bergabunglah dengan ribuan orang yang peduli dalam misi kebaikan untuk membantu mereka yang membutuhkan.
-              </p>
-            </div>
+        {activeSlots.map((item) => (
+          <div
+            key={item.id}
+            className="absolute w-24 h-24 sm:w-36 sm:h-36 lg:w-44 lg:h-44 rounded-2xl overflow-hidden shadow-md group z-20"
+            style={{
+              ...(item.position.top ? { top: item.position.top } : {}),
+              ...(item.position.bottom ? { bottom: item.position.bottom } : {}),
+              ...(item.position.left ? { left: item.position.left } : {}),
+              ...(item.position.right ? { right: item.position.right } : {}),
+              opacity: isVisible ? 1 : 0, 
+              transform: isVisible ? 'scale(1)' : 'scale(0.8)', 
+              transition: 'opacity 0.6s ease-in-out, transform 0.6s ease-in-out', 
+            }}
+          >
+            <img
+              src={`http://localhost:5000${item.url}`}
+              alt={item.title || "Dokumentasi"}
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            />
+            <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-300"></div>
+          </div>
+        ))}
 
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
-              <Link to="/donasi" className="group relative px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-green-500/50 transform hover:scale-105 text-center text-sm sm:text-base">
+        <div className="relative z-10 max-w-7xl mx-auto w-full">
+          <div className="space-y-8 text-center flex flex-col items-center">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight tracking-tight max-w-3xl">
+              Mewujudkan <span className="bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent">Harapan</span>, <br />
+              Memberi <span className="bg-gradient-to-r from-emerald-600 to-green-500 bg-clip-text text-transparent">Kehidupan Baru</span>
+            </h1>
+            <p className="text-base md:text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto">
+              Setiap donasi Anda adalah langkah kecil menuju perubahan besar. Bergabunglah dengan ribuan orang yang peduli dalam misi kebaikan untuk membantu mereka yang membutuhkan.
+            </p>
+            <div className="flex justify-center pt-4 w-full">
+              <Link 
+                to="/donasi" 
+                className="group relative px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 text-center text-lg z-30 shadow-xl shadow-green-500/40 hover:shadow-2xl hover:shadow-green-600/60"
+              >
                 <span className="flex items-center justify-center gap-2">
                   Mulai Donasi
-                  <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
                 </span>
               </Link>
-              <button className="group relative px-6 sm:px-8 py-3 sm:py-4 bg-white/80 hover:bg-white text-green-600 font-semibold rounded-lg border-2 border-green-500/30 hover:border-green-500 transition-all duration-300 backdrop-blur-sm hover:backdrop-blur shadow-md hover:shadow-lg text-sm sm:text-base">
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                  </svg>
-                  Pelajari Lebih Lanjut
-                </span>
-              </button>
-            </div>
-
-            <div className="pt-4">
-              <div className="flex items-center gap-6">
-                <div className="flex -space-x-3">
-                  <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=1" alt="User" className="w-10 h-10 rounded-full border-2 border-white shadow-md" />
-                  <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=2" alt="User" className="w-10 h-10 rounded-full border-2 border-white shadow-md" />
-                  <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=3" alt="User" className="w-10 h-10 rounded-full border-2 border-white shadow-md" />
-                </div>
-                <div>
-                  <p className="text-gray-900 font-semibold">Bergabung dengan Ribuan Donatur</p>
-                  <p className="text-gray-600 text-sm">Membantu komunitas di seluruh negara</p>
-                </div>
-              </div>
             </div>
           </div>
-
-          {/* Bento Box Highlight Dokumentasi - Desktop */}
-          <div className="hidden lg:block">
-            {loading ? (
-              <div className="grid grid-cols-5 gap-3 w-full">
-                {[3, 2, 2, 3].map((span, i) => (
-                  <div key={i} className={`col-span-${span} rounded-2xl bg-gray-200 h-[200px] animate-pulse`}></div>
-                ))}
-              </div>
-            ) : allImages.length > 0 ? (
-              <div className="grid grid-cols-5 gap-3 w-full">
-                {allImages.map((imageObj, idx) => (
-                  <div
-                    key={idx}
-                    className={`relative rounded-2xl overflow-hidden group h-[200px] shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer ${bentoClasses[idx] || "col-span-1"}`}
-                  >
-                    <img
-                      src={`http://localhost:5000${imageObj.url}`}
-                      alt={imageObj.title}
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-300"></div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="w-full h-[300px] bg-gray-100 rounded-2xl flex items-center justify-center">
-                <p className="text-gray-400 text-sm">Belum ada dokumentasi</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Bento Box Highlight Dokumentasi - Mobile */}
-        <div className="lg:hidden mt-12">
-          {loading ? (
-            <div className="grid grid-cols-2 gap-3 w-full">
-              {[1, 1, 1, 1].map((_, i) => (
-                <div key={i} className="rounded-2xl bg-gray-200 aspect-[4/3] animate-pulse"></div>
-              ))}
-            </div>
-          ) : allImages.length > 0 ? (
-            <div className="grid grid-cols-2 gap-3 w-full">
-              {allImages.map((imageObj, idx) => (
-                <div
-                  key={idx}
-                  className="relative rounded-2xl overflow-hidden group aspect-[4/3] shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer"
-                >
-                  <img
-                    src={`http://localhost:5000${imageObj.url}`}
-                    alt={imageObj.title}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-300"></div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="w-full h-[200px] bg-gray-100 rounded-2xl flex items-center justify-center">
-              <p className="text-gray-400 text-sm">Belum ada dokumentasi</p>
-            </div>
-          )}
         </div>
       </div>
     </div>
   );
 };
 
-
-
-// Komponen Program Kerja - Horizontal Scroll Carousel
+// Komponen Program Kerja - Carousel Looping Otomatis (Tanpa Click & Hover Pause)
 const ProgramKerja = () => {
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState('Semua');
+
+  const categories = ['Semua', 'Pendidikan', 'Kesehatan', 'Kemanusiaan', 'Lingkungan', 'Bencana Alam'];
 
   useEffect(() => {
     const fetchCampaigns = async () => {
@@ -212,16 +186,57 @@ const ProgramKerja = () => {
     fetchCampaigns();
   }, []);
 
-  if (loading) return (
-    <div className="py-12 md:py-20 bg-white">
-      <div className="px-4 md:px-10 lg:px-40 mb-6">
-        <div className="h-8 bg-gray-200 rounded w-48 animate-pulse"></div>
+  const filteredCampaigns = activeTab === 'Semua' 
+    ? campaigns 
+    : campaigns.filter(c => c.category?.toLowerCase() === activeTab.toLowerCase());
+
+  // Logika menduplikasi data jika item sedikit
+  let infiniteCampaigns = [...filteredCampaigns];
+  if (infiniteCampaigns.length > 0 && infiniteCampaigns.length < 6) {
+    infiniteCampaigns = [...infiniteCampaigns, ...infiniteCampaigns, ...infiniteCampaigns, ...infiniteCampaigns];
+  }
+
+  // Fungsi Helper untuk merender kartu (Sekarang menggunakan <div>, bukan <Link>)
+  const renderCard = (campaign, uniqueKey) => {
+    const firstImage = campaign.images && campaign.images.length > 0
+      ? `http://localhost:5000${campaign.images[0]}`
+      : "https://via.placeholder.com/600x1200";
+
+    return (
+      <div
+        key={uniqueKey}
+        // Menghapus 'cursor-pointer' karena kartu ini sudah tidak bisa diklik
+        className="flex-shrink-0 flex flex-col items-center w-[200px] sm:w-[240px]"
+      >
+        {/* Title */}
+        <h3 className="mb-4 text-sm font-bold text-gray-900 w-full text-center px-2 truncate">
+          {campaign.title}
+        </h3>
+        
+        {/* Poster Image - Efek hover pop-up tetap dipertahankan untuk estetika 3D */}
+        <div className="relative w-full h-[400px] sm:h-[480px] overflow-hidden rounded-[2rem] shadow-xl shadow-gray-300/60 bg-gray-50 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-gray-400/60 group">
+          <img
+            src={firstImage}
+            alt={campaign.title}
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 ring-1 ring-inset ring-black/5 rounded-[2rem]"></div>
+        </div>
       </div>
-      <div className="flex gap-4 px-4 md:px-10 lg:px-40 overflow-hidden">
+    );
+  };
+
+  if (loading) return (
+    <div className="py-20 bg-white">
+      <div className="flex flex-col items-center mb-12">
+        <div className="h-12 bg-gray-200 rounded-lg w-3/4 max-w-md animate-pulse mb-8"></div>
+        <div className="h-10 bg-gray-200 rounded-full w-96 animate-pulse"></div>
+      </div>
+      <div className="flex gap-6 px-4 md:px-10 lg:px-40 overflow-hidden">
         {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="flex-shrink-0" style={{ width: '180px' }}>
-            <div className="aspect-[2/3] bg-gray-200 rounded-2xl animate-pulse"></div>
-            <div className="h-4 bg-gray-200 rounded mt-3 w-3/4 animate-pulse"></div>
+          <div key={i} className="flex-shrink-0 flex flex-col items-center w-[200px] sm:w-[240px]">
+            <div className="h-4 bg-gray-200 rounded w-1/2 mb-4 animate-pulse"></div>
+            <div className="w-full h-[400px] sm:h-[480px] bg-gray-200 rounded-[2rem] animate-pulse"></div>
           </div>
         ))}
       </div>
@@ -232,67 +247,82 @@ const ProgramKerja = () => {
 
   return (
     <FadeInComponent>
-      <div className="py-12 md:py-20 bg-white">
-        {/* Header */}
-        <div className="px-4 md:px-10 lg:px-40 mb-6 md:mb-8">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-800">Program Kerja</h2>
-          <p className="text-gray-500 text-sm md:text-base mt-1">
-            Program unggulan dan kegiatan sosial kami.
-          </p>
-        </div>
+      <style>
+        {`
+          @keyframes marquee {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
+          }
+          .animate-marquee {
+            /* 40 detik durasi putaran */
+            animation: marquee 40s linear infinite; 
+          }
+        `}
+      </style>
 
-        {/* Horizontal Scroll Container */}
-        <div
-          className="flex gap-4 md:gap-5 px-4 md:px-10 lg:px-40 overflow-x-auto pb-4 scrollbar-hide"
-          style={{
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-          }}
-        >
-          {campaigns.map((campaign, index) => {
-            const firstImage = campaign.images && campaign.images.length > 0
-              ? `http://localhost:5000${campaign.images[0]}`
-              : "https://via.placeholder.com/300x450";
+      <div className="py-20 bg-white overflow-hidden overflow-x-hidden">
+        <div className="text-center px-4 mb-16">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 tracking-tight leading-tight">
+            Program sosial kami <br className="hidden sm:block" /> dalam hitungan detik.
+          </h2>
 
-            return (
-              <Link
-                to={`/donation/${campaign.id || campaign._id}`}
-                key={campaign.id || campaign._id}
-                className="flex-shrink-0 group cursor-pointer"
-                style={{ width: '180px' }}
-              >
-                {/* Poster Image */}
-                <div
-                  className={`relative overflow-hidden rounded-2xl shadow-md group-hover:shadow-xl transition-all duration-300 group-hover:scale-[1.03] ${
-                    index === 0 ? 'aspect-[2/3]' : 'aspect-[2/3]'
+          <div className="mt-8 flex justify-center px-4">
+            <div className="inline-flex bg-gray-100 p-1.5 rounded-full space-x-1 overflow-x-auto scrollbar-hide border border-gray-200/50">
+              {categories.map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-300 ${
+                    activeTab === tab
+                      ? 'bg-white text-gray-900 shadow-sm border border-gray-200/40'
+                      : 'text-gray-500 hover:text-gray-900 hover:bg-gray-200/50'
                   }`}
                 >
-                  <img
-                    src={firstImage}
-                    alt={campaign.title}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                  {/* Gradient overlay di bagian bawah */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                </div>
-
-                {/* Title */}
-                <p className="mt-2.5 text-sm font-medium text-gray-700 group-hover:text-green-600 transition-colors duration-200 line-clamp-1 px-0.5">
-                  {campaign.title}
-                </p>
-              </Link>
-            );
-          })}
+                  {tab}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
+
+        {filteredCampaigns.length > 0 ? (
+          <div className="relative w-full overflow-hidden pb-12 pt-6">
+            
+            <div className="absolute top-0 left-0 w-16 md:w-32 h-full bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
+            <div className="absolute top-0 right-0 w-16 md:w-32 h-full bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
+
+            {/* TRACK ANIMASI: Menghapus class 'hover:[animation-play-state:paused]' */}
+            <div className="flex w-max animate-marquee">
+              
+              <div className="flex gap-6 md:gap-8 pr-6 md:pr-8">
+                {infiniteCampaigns.map((campaign, idx) => 
+                  renderCard(campaign, `set1-${campaign._id || campaign.id}-${idx}`)
+                )}
+              </div>
+              
+              <div className="flex gap-6 md:gap-8 pr-6 md:pr-8">
+                {infiniteCampaigns.map((campaign, idx) => 
+                  renderCard(campaign, `set2-${campaign._id || campaign.id}-${idx}`)
+                )}
+              </div>
+
+            </div>
+          </div>
+        ) : (
+          <div className="w-full text-center py-20">
+            <p className="text-gray-500 text-lg">Tidak ada program untuk kategori ini.</p>
+          </div>
+        )}
+
       </div>
     </FadeInComponent>
   );
 };
 
-// Komponen Utama
+// KOMPONEN UTAMA
 const HomePage = () => {
   return (
-    <div>
+    <div className="bg-white min-h-screen">
       <Hero1 />
       <ProgramKerja />
     </div>

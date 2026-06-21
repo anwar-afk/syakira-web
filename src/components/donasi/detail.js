@@ -18,7 +18,7 @@ const DonationDetailPage = () => {
   const [donationHistory, setDonationHistory] = useState([]);
   const { user } = useContext(AuthContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [amount, setAmount] = useState('');
+  const [formData, setFormData] = useState({ amount: '', name: '', email: '' });
   const [donationError, setDonationError] = useState(null);
 
   const fadeIn = useSpring({
@@ -30,28 +30,35 @@ const DonationDetailPage = () => {
   // Ambil data campaign dan riwayat donasi saat komponen dimuat
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
-        // Ambil data campaign
+        // 1. Ambil data campaign
         const campaignData = await getCampaigns();
         const campaignsArray = Array.isArray(campaignData) ? campaignData : campaignData.campaigns || campaignData.data || [];
-        const selectedCampaign = campaignsArray.find((campaign) => campaign._id === id);
+        
+        // Perbaikan: Pastikan tipe data ID sama (String) saat dibandingkan
+        const selectedCampaign = campaignsArray.find((campaign) => String(campaign._id) === String(id));
+        
         if (selectedCampaign) {
           setCampaign(selectedCampaign);
         } else {
           setError("Data campaign tidak ditemukan.");
         }
+      } catch (error) {
+        console.error("Error fetching campaign data:", error);
+        setError("Gagal memuat data campaign.");
+      } finally {
+        setLoading(false);
+      }
 
-        // Ambil riwayat donasi jika user sudah login
-        if (user) {
+      // 2. Ambil riwayat donasi (dipisah agar jika error, halaman utama tidak crash)
+      if (user) {
+        try {
           const historyData = await getDonationHistory();
           setDonationHistory(historyData);
+        } catch (historyError) {
+          console.error("Error fetching donation history:", historyError);
         }
-
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setError("Gagal memuat data.");
-        setLoading(false);
       }
     };
 
@@ -63,29 +70,36 @@ const DonationDetailPage = () => {
   }, []);
 
   const openModal = () => {
-    if (!user) {
-      alert("Harap login dulu jika ingin berdonasi.");
-      return;
-    }
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setAmount('');
+    setFormData({ amount: '', name: '', email: '' });
     setDonationError(null);
   };
 
   const handleDonationSubmit = async (e) => {
     e.preventDefault();
 
-    if (!amount || isNaN(amount) || amount <= 0) {
+    if (!formData.amount || isNaN(formData.amount) || formData.amount <= 0) {
       setDonationError("Masukkan jumlah donasi yang valid.");
       return;
     }
 
+    if (!user && (!formData.name.trim() || !formData.email.trim())) {
+      setDonationError("Masukkan nama dan email untuk melanjutkan donasi.");
+      return;
+    }
+
     try {
-      const response = await createDonation(id, amount);
+      const donationPayload = {
+        amount: formData.amount,
+        name: user ? user.username : formData.name.trim(),
+        email: user ? user.username : formData.email.trim(),
+      };
+
+      const response = await createDonation(id, donationPayload);
       if (response.success) {
         window.location.href = response.paymentUrl;
       } else {
@@ -135,15 +149,24 @@ const DonationDetailPage = () => {
               loop={true}
               className="rounded-lg shadow-lg"
             >
-              {campaign.images.map((image, index) => (
-                <SwiperSlide key={index}>
-                  <img
-                    src={`http://localhost:5000${image}`}
-                    alt={`Campaign Image ${index + 1}`}
-                    className="w-full h-64 lg:h-96 object-cover rounded-lg"
-                  />
+              {/* Perbaikan: Cek apakah campaign.images ada dan tidak kosong sebelum di-map */}
+              {campaign?.images && campaign.images.length > 0 ? (
+                campaign.images.map((image, index) => (
+                  <SwiperSlide key={index}>
+                    <img
+                      src={`http://localhost:5000${image}`}
+                      alt={`Campaign Image ${index + 1}`}
+                      className="w-full h-64 lg:h-96 object-cover rounded-lg"
+                    />
+                  </SwiperSlide>
+                ))
+              ) : (
+                <SwiperSlide>
+                  <div className="w-full h-64 lg:h-96 bg-gray-200 flex items-center justify-center rounded-lg">
+                    <p className="text-gray-500">Tidak ada gambar tersedia</p>
+                  </div>
                 </SwiperSlide>
-              ))}
+              )}
             </Swiper>
           </div>
 
@@ -197,21 +220,12 @@ const DonationDetailPage = () => {
                 <p className="text-gray-600">Belum ada donasi yang berhasil.</p>
               )
             ) : (
-              <p className="text-gray-600">Login dan lihat riwayat donasi kamu.</p>
+              <p className="text-gray-600">
+                <Link to="/login" className="text-green-600 hover:underline">Login</Link> untuk melihat riwayat donasi kamu.
+              </p>
             )}
           </div>
         </section>
-
-        {!user && (
-          <div className="mt-8">
-            <Link
-              to="/login"
-              className="px-6 py-3 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600 transform hover:scale-105 transition-all duration-300"
-            >
-              Login untuk Donasi
-            </Link>
-          </div>
-        )}
       </main>
 
       {/* Modal untuk Donasi */}
@@ -227,13 +241,45 @@ const DonationDetailPage = () => {
                 <input
                   type="number"
                   id="amount"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  value={formData.amount}
+                  onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   placeholder="Masukkan jumlah donasi"
                   required
                 />
               </div>
+              {!user && (
+                <>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
+                      Nama Lengkap
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                      placeholder="Masukkan nama lengkap"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                      placeholder="Email untuk bukti transfer"
+                      required
+                    />
+                  </div>
+                </>
+              )}
               {donationError && (
                 <p className="text-red-500 text-sm mb-4">{donationError}</p>
               )}
