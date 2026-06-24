@@ -254,8 +254,27 @@ const DonationDetailPage = () => {
             <h2 className="text-2xl font-bold text-gray-800 mb-6">Donasi Sekarang</h2>
             <form onSubmit={handleDonationSubmit}>
               <div className="mb-5">
+                <label className="block text-gray-700 text-sm font-semibold mb-2">
+                  Pilih Nominal Donasi (Rp)
+                </label>
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  {[50000, 100000, 250000, 500000].map((nominal) => (
+                    <button
+                      key={nominal}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, amount: String(nominal) })}
+                      className={`px-4 py-3 rounded-xl font-semibold border-2 transition-all duration-200 ${
+                        formData.amount === String(nominal)
+                          ? 'bg-green-600 text-white border-green-600 shadow-md'
+                          : 'bg-white text-gray-700 border-gray-300 hover:border-green-400 hover:bg-green-50'
+                      }`}
+                    >
+                      Rp {nominal.toLocaleString()}
+                    </button>
+                  ))}
+                </div>
                 <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="amount">
-                  Jumlah Donasi (Rp)
+                  Atau Masukkan Nominal Lain
                 </label>
                 <input
                   type="number"
@@ -263,8 +282,7 @@ const DonationDetailPage = () => {
                   value={formData.amount}
                   onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 transition"
-                  placeholder="Contoh: 50000"
-                  required
+                  placeholder="Masukkan nominal sendiri"
                 />
               </div>
               {!user && (
