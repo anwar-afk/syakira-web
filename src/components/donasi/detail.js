@@ -136,7 +136,7 @@ const DonationDetailPage = () => {
   }
 
   return (
-    <animated.div style={fadeIn} className="min-h-screen bg-gray-50">
+    <animated.div style={fadeIn} className="min-h-screen bg-gray-50 pt-20">
       <main className="container mx-auto px-4 sm:px-6 lg:px-20 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div>
@@ -175,12 +175,31 @@ const DonationDetailPage = () => {
               {campaign.category}
             </span>
             <h2 className="text-2xl lg:text-3xl font-bold text-gray-800 mt-4">{campaign.title}</h2>
-            <p className="text-gray-600 mt-4 text-lg leading-relaxed">
+            
+            {/* Progress Bar & Stats */}
+            <div className="mt-6">
+              <div className="flex justify-between text-sm font-semibold text-gray-700 mb-2">
+                <span>Rp {campaign.collected?.toLocaleString() || 0} terkumpul</span>
+                <span>Target: Rp {campaign.target?.toLocaleString() || 0}</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div
+                  className="bg-green-500 h-3 rounded-full"
+                  style={{ width: `${Math.min((campaign.collected / campaign.target) * 100, 100)}%` }}
+                ></div>
+              </div>
+              <div className="flex justify-between text-xs text-gray-500 mt-2">
+                <span>{Math.round((campaign.collected / campaign.target) * 100) || 0}% tercapai</span>
+                <span>{campaign.daysLeft || 0} hari lagi</span>
+              </div>
+            </div>
+
+            <p className="text-gray-600 mt-6 text-lg leading-relaxed">
               {campaign.detail}
             </p>
             <button
               onClick={openModal}
-              className="w-full mt-6 px-6 py-3 bg-green-500 text-white text-lg rounded-full shadow-md hover:bg-green-600 transform hover:scale-105 transition-all duration-300"
+              className="w-full mt-8 px-6 py-4 bg-green-600 text-white text-lg font-bold rounded-xl shadow-lg hover:bg-green-700 transition-all duration-300"
             >
               Donasi Sekarang
             </button>
@@ -232,10 +251,10 @@ const DonationDetailPage = () => {
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Donasi Sekarang</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">Donasi Sekarang</h2>
             <form onSubmit={handleDonationSubmit}>
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="amount">
+              <div className="mb-5">
+                <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="amount">
                   Jumlah Donasi (Rp)
                 </label>
                 <input
@@ -243,15 +262,15 @@ const DonationDetailPage = () => {
                   id="amount"
                   value={formData.amount}
                   onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="Masukkan jumlah donasi"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 transition"
+                  placeholder="Contoh: 50000"
                   required
                 />
               </div>
               {!user && (
                 <>
-                  <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
+                  <div className="mb-5">
+                    <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="name">
                       Nama Lengkap
                     </label>
                     <input
@@ -259,13 +278,13 @@ const DonationDetailPage = () => {
                       id="name"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 transition"
                       placeholder="Masukkan nama lengkap"
                       required
                     />
                   </div>
-                  <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
+                  <div className="mb-5">
+                    <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="email">
                       Email
                     </label>
                     <input
@@ -273,7 +292,7 @@ const DonationDetailPage = () => {
                       id="email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 transition"
                       placeholder="Email untuk bukti transfer"
                       required
                     />
@@ -281,21 +300,21 @@ const DonationDetailPage = () => {
                 </>
               )}
               {donationError && (
-                <p className="text-red-500 text-sm mb-4">{donationError}</p>
+                <p className="text-red-500 text-sm mb-4 bg-red-50 p-2 rounded">{donationError}</p>
               )}
-              <div className="flex justify-end space-x-4">
+              <div className="flex justify-end space-x-3 mt-6">
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                  className="px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                  className="px-6 py-3 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition"
                 >
-                  Donasi
+                  Lanjut Pembayaran
                 </button>
               </div>
             </form>
