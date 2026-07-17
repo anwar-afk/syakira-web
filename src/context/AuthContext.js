@@ -16,6 +16,20 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('role', userData.role); // Simpan role ke localStorage
   };
 
+  // Fungsi untuk login sebagai guest
+  const loginAsGuest = () => {
+    const guestData = {
+      username: 'Tamu',
+      token: 'guest-token',
+      role: 'guest',
+    };
+    setUser(guestData);
+    setRole('guest');
+    setLastInteraction(Date.now());
+    localStorage.setItem('token', 'guest-token');
+    localStorage.setItem('role', 'guest');
+  };
+
   // Fungsi untuk logout
   const logout = () => {
     setUser(null);
@@ -55,7 +69,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, role, login, logout, updateLastInteraction }}>
+    <AuthContext.Provider value={{ user, role, login, loginAsGuest, logout, updateLastInteraction }}>
       {children}
     </AuthContext.Provider>
   );

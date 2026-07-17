@@ -11,7 +11,7 @@ const LoginPage = () => {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  const { login: authLogin } = useContext(AuthContext);
+  const { login: authLogin, loginAsGuest } = useContext(AuthContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -97,6 +97,24 @@ const LoginPage = () => {
               Login
             </button>
           </form>
+
+          {/* Divider */}
+          <div className="flex items-center my-6">
+            <div className="flex-1 border-t border-gray-300"></div>
+            <span className="px-3 text-sm text-gray-500">atau</span>
+            <div className="flex-1 border-t border-gray-300"></div>
+          </div>
+
+          {/* Guest Login Button */}
+          <button
+            onClick={() => {
+              loginAsGuest();
+              navigate('/');
+            }}
+            className="w-full py-3 px-4 rounded-full border-2 border-green-500 text-green-500 font-medium hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
+          >
+            Masuk sebagai Tamu
+          </button>
 
           <p className="mt-8 text-center text-sm text-gray-600">
             Don't have an account?{' '}
