@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSpring, animated } from "@react-spring/web";
 import axios from "axios";
+import API_BASE_URL from "../../config/api";
 
 const Album = () => {
   const [documentations, setDocumentations] = useState([]);
@@ -12,7 +13,7 @@ const Album = () => {
     const fetchDocumentations = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/documentations"
+          `${API_BASE_URL}/api/documentations`
         );
         setDocumentations(response.data);
         setLoading(false);
@@ -64,7 +65,7 @@ const Album = () => {
                   className="break-inside-avoid overflow-hidden rounded-xl inline-block w-full mb-4 bg-white group relative cursor-pointer shadow-md hover:shadow-xl transition-shadow duration-300"
                 >
                   <img
-                    src={`http://localhost:5000${image}`}
+                    src={`${API_BASE_URL}${image}`}
                     alt={`Documentation ${index}`}
                     className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
                     loading="lazy"

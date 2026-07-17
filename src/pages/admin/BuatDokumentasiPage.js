@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import API_BASE_URL from "../../config/api";
 
 const BuatDokumentasiPage = () => {
   const [title, setTitle] = useState("");
@@ -38,7 +39,7 @@ const BuatDokumentasiPage = () => {
 
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "http://localhost:5000/api/documentations",
+        `${API_BASE_URL}/api/documentations`,
         formData,
         {
           headers: {

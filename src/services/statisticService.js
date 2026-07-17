@@ -1,7 +1,8 @@
 // services/statisticService.js
 import axios from 'axios';
+import API_BASE_URL from '../config/api';
 
-const baseUrl = 'http://localhost:5000/api';
+const baseUrl = `${API_BASE_URL}/api`;
 
 export const getStatistics = async () => {
   try {

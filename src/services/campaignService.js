@@ -1,6 +1,7 @@
 import axios from 'axios';
+import API_BASE_URL from '../config/api';
 
-const API_URL = 'http://localhost:5000/api/campaigns'; // Sesuaikan dengan URL API Anda
+const API_URL = `${API_BASE_URL}/api/campaigns`;
 
 // Fungsi untuk mengambil semua campaign
 export const getCampaigns = async () => {

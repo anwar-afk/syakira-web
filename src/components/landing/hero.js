@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useSpring, animated, useInView } from '@react-spring/web';
 import axios from 'axios';
 import { getCampaigns } from '../../services/campaignService';
+import API_BASE_URL from '../../config/api';
 
 function FadeInComponent({ children }) {
   const [ref, inView] = useInView({ threshold: 0.2 });
@@ -42,7 +43,7 @@ const Hero1 = () => {
   useEffect(() => {
     const fetchDocumentations = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/documentations');
+        const response = await axios.get(`${API_BASE_URL}/api/documentations`);
         const pool = response.data.flatMap((doc) =>
           doc.images && doc.images.length > 0
             ? doc.images.map((image) => ({ url: image, title: doc.title }))
@@ -124,7 +125,7 @@ const Hero1 = () => {
             }}
           >
             <img
-              src={`http://localhost:5000${item.url}`}
+              src={`${API_BASE_URL}${item.url}`}
               alt={item.title || "Dokumentasi"}
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
             />
@@ -199,7 +200,7 @@ const ProgramKerja = () => {
   // Fungsi Helper untuk merender kartu (Sekarang menggunakan <div>, bukan <Link>)
   const renderCard = (campaign, uniqueKey) => {
     const firstImage = campaign.images && campaign.images.length > 0
-      ? `http://localhost:5000${campaign.images[0]}`
+      ? `${API_BASE_URL}${campaign.images[0]}`
       : "https://via.placeholder.com/600x1200";
 
     return (

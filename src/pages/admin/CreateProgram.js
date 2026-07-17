@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import API_BASE_URL from '../../config/api';
 
 const CreateProgram = () => {
   const [formData, setFormData] = useState({
@@ -59,7 +60,7 @@ const CreateProgram = () => {
     try {
       // Kirim data ke backend
       const response = await axios.post(
-        'https://express-production-c596.up.railway.app/api/campaigns',
+        `${API_BASE_URL}/api/campaigns`,
         data,
         {
           headers: {

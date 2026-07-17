@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import ProgramForm from '../../components/admin/JS_programForm'; // Sesuaikan path
+import API_BASE_URL from '../../config/api';
 
 const ProgramPage = () => {
   const [selectedProgram, setSelectedProgram] = useState(null); // Untuk menyimpan program yang dipilih (edit)
@@ -11,14 +12,12 @@ const ProgramPage = () => {
   // Ambil token dari localStorage
   const token = localStorage.getItem('token');
 
-  // Base URL API
-  const baseUrl = 'http://localhost:5000';
 
   // Fungsi untuk mengambil data campaigns
   const fetchCampaigns = async () => {
     try {
       const response = await axios.get(
-        `${baseUrl}/api/campaigns`,
+        `${API_BASE_URL}/api/campaigns`,
         {
           headers: {
             Authorization: `Bearer ${token}`, // Tambahkan token ke header
@@ -42,7 +41,7 @@ const ProgramPage = () => {
   const handleCreateProgram = async (data) => {
     try {
       const response = await axios.post(
-        `${baseUrl}/api/campaigns`,
+        `${API_BASE_URL}/api/campaigns`,
         data,
         {
           headers: {
@@ -65,7 +64,7 @@ const ProgramPage = () => {
   const handleUpdateProgram = async (data) => {
     try {
       const response = await axios.put(
-        `${baseUrl}/api/campaigns/${selectedProgram.id || selectedProgram._id}`,
+        `${API_BASE_URL}/api/campaigns/${selectedProgram.id || selectedProgram._id}`,
         data,
         {
           headers: {
@@ -90,7 +89,7 @@ const ProgramPage = () => {
   const handleDeleteProgram = async (campaignId) => {
     try {
       await axios.delete(
-        `${baseUrl}/api/campaigns/${campaignId}`,
+        `${API_BASE_URL}/api/campaigns/${campaignId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`, // Tambahkan token ke header
@@ -146,7 +145,7 @@ const ProgramPage = () => {
                     {campaign.images.map((image, index) => (
                       <img
                         key={index}
-                        src={`${baseUrl}${image}`} // Gabungkan base URL dengan path gambar
+                        src={`${API_BASE_URL}${image}`}
                         alt={`Campaign Image ${index + 1}`}
                         className="w-16 h-16 object-cover rounded-md"
                       />

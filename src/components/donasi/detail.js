@@ -4,6 +4,7 @@ import { useSpring, animated } from '@react-spring/web';
 import { getCampaigns } from '../../services/campaignService';
 import { AuthContext } from '../../context/AuthContext';
 import { createDonation, getDonationHistory } from '../../services/donateService';
+import API_BASE_URL from '../../config/api';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -154,7 +155,7 @@ const DonationDetailPage = () => {
                 campaign.images.map((image, index) => (
                   <SwiperSlide key={index}>
                     <img
-                      src={`http://localhost:5000${image}`}
+                      src={`${API_BASE_URL}${image}`}
                       alt={`Campaign Image ${index + 1}`}
                       className="w-full h-64 lg:h-96 object-cover rounded-lg"
                     />

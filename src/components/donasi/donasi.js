@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { getCampaigns } from "../../services/campaignService";
 import { useSpring, animated } from "@react-spring/web";
 import { useInView } from "react-intersection-observer";
+import API_BASE_URL from "../../config/api";
 
 // Komponen Header (DonasiHeader) - Premium SaaS Style
 export const DonasiHeader = () => {
@@ -223,7 +224,7 @@ const CampaignCard = ({ campaign }) => {
   });
 
   const firstImage = campaign.images && campaign.images.length > 0
-    ? `http://localhost:5000${campaign.images[0]}`
+    ? `${API_BASE_URL}${campaign.images[0]}`
     : "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=600&q=80"; // Fallback modern
 
   return (

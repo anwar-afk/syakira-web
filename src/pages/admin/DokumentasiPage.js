@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import API_BASE_URL from "../../config/api";
 // Import Swiper React components
 import { Swiper, SwiperSlide } from "swiper/react";
 // Import Swiper styles
@@ -20,7 +21,7 @@ const DokumentasiPage = () => {
     const fetchDocumentations = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/documentations"
+          `${API_BASE_URL}/api/documentations`
         );
         setDocumentations(response.data); // Simpan data ke state
         setLoading(false); // Set loading ke false setelah data diterima
@@ -48,7 +49,7 @@ const DokumentasiPage = () => {
     try {
       const token = localStorage.getItem("token"); // Ambil token dari localStorage
       await axios.delete(
-        `http://localhost:5000/api/documentations/${documentationId}`,
+        `${API_BASE_URL}/api/documentations/${documentationId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`, // Tambahkan token ke header
@@ -99,7 +100,7 @@ const DokumentasiPage = () => {
                   {doc.images.map((image, index) => (
                     <SwiperSlide key={index}>
                       <img
-                        src={`http://localhost:5000${image}`}
+                        src={`${API_BASE_URL}${image}`}
                         alt={`Dokumentasi ${index + 1}`}
                         className="w-full h-48 object-cover"
                       />
