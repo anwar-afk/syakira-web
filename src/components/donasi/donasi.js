@@ -131,11 +131,10 @@ export const DonasiContent = () => {
 
   const filteredCampaigns = campaigns.filter((campaign) => {
     const isCategoryMatch = selectedCategory === "all" || campaign.category?.toLowerCase() === selectedCategory;
-    const isActive = new Date(campaign.endDate) > new Date();
-    return isCategoryMatch && isActive;
+    return isCategoryMatch;
   });
 
-  const visibleCampaigns = showAll ? filteredCampaigns : filteredCampaigns.slice(0, 8); // Tampilkan 8 agar seimbang di grid 4 kolom
+  const visibleCampaigns = showAll ? filteredCampaigns : filteredCampaigns.slice(0, 10); // Tampilkan 10 kampanye terbaru
 
   return (
     <div id="donasi-content" className="bg-slate-50 py-16 lg:py-24">
@@ -197,7 +196,7 @@ export const DonasiContent = () => {
             </div>
 
             {/* Load More Button */}
-            {filteredCampaigns.length > 8 && (
+            {filteredCampaigns.length > 10 && (
               <div className="flex justify-center mt-12">
                 <button
                   onClick={() => setShowAll(!showAll)}

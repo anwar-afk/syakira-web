@@ -153,7 +153,9 @@ const ProgramPage = () => {
                     ))}
                   </div>
                 </td>
-                <td className="py-2 px-4 border-b">{new Date(campaign.date).toLocaleDateString()}</td>
+                <td className="py-2 px-4 border-b">
+                  {campaign.date ? new Date(campaign.date).toLocaleDateString() : '-'}
+                </td>
                 <td className="py-2 px-4 border-b">
                   <button
                     onClick={() => {
