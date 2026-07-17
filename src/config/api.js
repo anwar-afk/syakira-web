@@ -1,3 +1,3 @@
-const API_BASE_URL = 'https://broiler-otter-mortified.ngrok-free.dev';
+const API_BASE_URL = '';
 
 export default API_BASE_URL;
