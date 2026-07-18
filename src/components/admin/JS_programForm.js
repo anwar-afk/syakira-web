@@ -1,14 +1,6 @@
 import React, { useState } from 'react';
 
 const ProgramForm = ({ programData, onSubmit, onCancel }) => {
-  const [title, setTitle] = useState(programData ? programData.title : '');
-  const [detail, setDetail] = useState(programData ? programData.detail : '');
-  const [category, setCategory] = useState(programData ? programData.category : categories[0].value);
-  const [startDate, setStartDate] = useState(programData ? programData.startDate : '');
-  const [endDate, setEndDate] = useState(programData ? programData.endDate : '');
-  const [target, setTarget] = useState(programData ? programData.target : '');
-  const [images, setImages] = useState([]);
-
   // Daftar kategori yang tersedia (value harus match dengan backend enum)
   const categories = [
     { value: "bencana_alam", label: "Bencana Alam" },
@@ -18,6 +10,14 @@ const ProgramForm = ({ programData, onSubmit, onCancel }) => {
     { value: "lingkungan", label: "Lingkungan" },
     { value: "lainnya", label: "Lainnya" },
   ];
+
+  const [title, setTitle] = useState(programData ? programData.title : '');
+  const [detail, setDetail] = useState(programData ? programData.detail : '');
+  const [category, setCategory] = useState(programData ? programData.category : categories[0].value);
+  const [startDate, setStartDate] = useState(programData ? programData.startDate : '');
+  const [endDate, setEndDate] = useState(programData ? programData.endDate : '');
+  const [target, setTarget] = useState(programData ? programData.target : '');
+  const [images, setImages] = useState([]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
