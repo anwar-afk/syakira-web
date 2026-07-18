@@ -110,29 +110,6 @@ const Hero1 = () => {
           }}
         ></div>
 
-        {activeSlots.map((item) => (
-          <div
-            key={item.id}
-            className="absolute w-24 h-24 sm:w-36 sm:h-36 lg:w-44 lg:h-44 rounded-2xl overflow-hidden shadow-md group z-20"
-            style={{
-              ...(item.position.top ? { top: item.position.top } : {}),
-              ...(item.position.bottom ? { bottom: item.position.bottom } : {}),
-              ...(item.position.left ? { left: item.position.left } : {}),
-              ...(item.position.right ? { right: item.position.right } : {}),
-              opacity: isVisible ? 1 : 0, 
-              transform: isVisible ? 'scale(1)' : 'scale(0.8)', 
-              transition: 'opacity 0.6s ease-in-out, transform 0.6s ease-in-out', 
-            }}
-          >
-            <img
-              src={`${API_BASE_URL}${item.url}`}
-              alt={item.title || "Dokumentasi"}
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-            />
-            <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-300"></div>
-          </div>
-        ))}
-
         <div className="relative z-10 max-w-7xl mx-auto w-full">
           <div className="space-y-8 text-center flex flex-col items-center">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight tracking-tight max-w-3xl">
@@ -155,6 +132,31 @@ const Hero1 = () => {
                 </span>
               </Link>
             </div>
+          </div>
+
+          {/* Dynamic Photos Section - Now below the text content */}
+          <div className="relative w-full h-[300px] sm:h-[450px] mt-12 sm:mt-16 overflow-visible">
+            {activeSlots.map((item) => (
+              <div
+                key={item.id}
+                className="absolute w-20 h-20 sm:w-36 sm:h-36 lg:w-44 lg:h-44 rounded-2xl overflow-hidden shadow-lg group transition-all duration-700"
+                style={{
+                  ...(item.position.top ? { top: item.position.top } : {}),
+                  ...(item.position.bottom ? { bottom: item.position.bottom } : {}),
+                  ...(item.position.left ? { left: item.position.left } : {}),
+                  ...(item.position.right ? { right: item.position.right } : {}),
+                  opacity: isVisible ? 1 : 0, 
+                  transform: isVisible ? 'scale(1) rotate(' + (item.id % 2 === 0 ? '3deg' : '-3deg') + ')' : 'scale(0.8) rotate(0deg)', 
+                }}
+              >
+                <img
+                  src={`${API_BASE_URL}${item.url}`}
+                  alt={item.title || "Dokumentasi"}
+                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-300"></div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
