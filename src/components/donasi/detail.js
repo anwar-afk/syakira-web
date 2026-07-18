@@ -157,13 +157,13 @@ const DonationDetailPage = () => {
                     <img
                       src={`${API_BASE_URL}${image}`}
                       alt={`Campaign Image ${index + 1}`}
-                      className="w-full h-64 lg:h-96 object-cover rounded-lg"
+                      className="w-full h-48 sm:h-56 lg:h-96 object-cover rounded-lg"
                     />
                   </SwiperSlide>
                 ))
               ) : (
                 <SwiperSlide>
-                  <div className="w-full h-64 lg:h-96 bg-gray-200 flex items-center justify-center rounded-lg">
+                  <div className="w-full h-48 sm:h-56 lg:h-96 bg-gray-200 flex items-center justify-center rounded-lg">
                     <p className="text-gray-500">Tidak ada gambar tersedia</p>
                   </div>
                 </SwiperSlide>

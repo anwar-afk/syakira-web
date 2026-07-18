@@ -207,7 +207,7 @@ const ProgramKerja = () => {
       <div
         key={uniqueKey}
         // Menghapus 'cursor-pointer' karena kartu ini sudah tidak bisa diklik
-        className="flex-shrink-0 flex flex-col items-center w-[200px] sm:w-[240px]"
+        className="flex-shrink-0 flex flex-col items-center w-[160px] sm:w-[200px] lg:w-[240px]"
       >
         {/* Title */}
         <h3 className="mb-4 text-sm font-bold text-gray-900 w-full text-center px-2 truncate">
@@ -215,7 +215,7 @@ const ProgramKerja = () => {
         </h3>
         
         {/* Poster Image - Efek hover pop-up tetap dipertahankan untuk estetika 3D */}
-        <div className="relative w-full h-[400px] sm:h-[480px] overflow-hidden rounded-[2rem] shadow-xl shadow-gray-300/60 bg-gray-50 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-gray-400/60 group">
+        <div className="relative w-full h-[280px] sm:h-[360px] lg:h-[480px] overflow-hidden rounded-[2rem] shadow-xl shadow-gray-300/60 bg-gray-50 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-gray-400/60 group">
           <img
             src={firstImage}
             alt={campaign.title}
@@ -235,9 +235,9 @@ const ProgramKerja = () => {
       </div>
       <div className="flex gap-6 px-4 md:px-10 lg:px-40 overflow-hidden">
         {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="flex-shrink-0 flex flex-col items-center w-[200px] sm:w-[240px]">
+            <div key={i} className="flex-shrink-0 flex flex-col items-center w-[160px] sm:w-[200px] lg:w-[240px]">
             <div className="h-4 bg-gray-200 rounded w-1/2 mb-4 animate-pulse"></div>
-            <div className="w-full h-[400px] sm:h-[480px] bg-gray-200 rounded-[2rem] animate-pulse"></div>
+            <div className="w-full h-[280px] sm:h-[360px] lg:h-[480px] bg-gray-200 rounded-[2rem] animate-pulse"></div>
           </div>
         ))}
       </div>
