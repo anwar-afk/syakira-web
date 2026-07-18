@@ -9,14 +9,14 @@ const ProgramForm = ({ programData, onSubmit, onCancel }) => {
   const [target, setTarget] = useState(programData ? programData.target : '');
   const [images, setImages] = useState([]);
 
-  // Daftar kategori yang tersedia
+  // Daftar kategori yang tersedia (value harus match dengan backend enum)
   const categories = [
-    "bencana alam",
-    "pendidikan",
-    "kesehatan",
-    "kemanusiaan",
-    "lingkungan",
-    "lainnya",
+    { value: "bencana_alam", label: "Bencana Alam" },
+    { value: "pendidikan", label: "Pendidikan" },
+    { value: "kesehatan", label: "Kesehatan" },
+    { value: "kemanusiaan", label: "Kemanusiaan" },
+    { value: "lingkungan", label: "Lingkungan" },
+    { value: "lainnya", label: "Lainnya" },
   ];
 
   const handleSubmit = (e) => {
@@ -79,8 +79,8 @@ const ProgramForm = ({ programData, onSubmit, onCancel }) => {
           required
         >
           {categories.map((cat, index) => (
-            <option key={index} value={cat}>
-              {cat}
+            <option key={index} value={cat.value}>
+              {cat.label}
             </option>
           ))}
         </select>
