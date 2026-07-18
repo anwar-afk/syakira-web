@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 const ProgramForm = ({ programData, onSubmit, onCancel }) => {
   const [title, setTitle] = useState(programData ? programData.title : '');
   const [detail, setDetail] = useState(programData ? programData.detail : '');
-  const [category, setCategory] = useState(programData ? programData.category : '');
+  const [category, setCategory] = useState(programData ? programData.category : categories[0].value);
   const [startDate, setStartDate] = useState(programData ? programData.startDate : '');
   const [endDate, setEndDate] = useState(programData ? programData.endDate : '');
   const [target, setTarget] = useState(programData ? programData.target : '');
