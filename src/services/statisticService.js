@@ -1,15 +1,11 @@
-// services/statisticService.js
-import axios from 'axios';
-import API_BASE_URL from '../config/api';
-
-const baseUrl = `${API_BASE_URL}/api`;
+import apiClient from '../api/apiClient';
+import { getErrorMessage } from '../utils/getErrorMessage';
 
 export const getStatistics = async () => {
   try {
-    const response = await axios.get(`${baseUrl}/statistics`);
-    return response.data.data; // Mengembalikan data statistik
+    const response = await apiClient.get('/api/statistics');
+    return response.data?.data ?? response.data;
   } catch (error) {
-    console.error('Error fetching statistics:', error);
-    throw error;
+    throw new Error(getErrorMessage(error, 'Gagal memuat statistik'));
   }
 };

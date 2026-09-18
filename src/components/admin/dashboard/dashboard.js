@@ -1,28 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import API_BASE_URL from '../../../config/api';
+import { getCampaigns } from '../../../services/campaignService';
+import { getDocumentations } from '../../../services/documentationService';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({ programs: 0, documentations: 0 });
   const [recentCampaigns, setRecentCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const token = localStorage.getItem('token');
-
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [campaignsRes, docsRes] = await Promise.all([
-          axios.get(`${API_BASE_URL}/api/campaigns`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          axios.get(`${API_BASE_URL}/api/documentations`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
+        const [campaigns, docs] = await Promise.all([
+          getCampaigns(),
+          getDocumentations(),
         ]);
-
-        const campaigns = Array.isArray(campaignsRes.data) ? campaignsRes.data : campaignsRes.data.campaigns || campaignsRes.data.data || [];
-        const docs = Array.isArray(docsRes.data) ? docsRes.data : docsRes.data.documentations || docsRes.data.data || [];
 
         setStats({ programs: campaigns.length, documentations: docs.length });
         setRecentCampaigns(campaigns.slice(0, 5));
@@ -34,7 +26,7 @@ const Dashboard = () => {
     };
 
     fetchDashboardData();
-  }, [token]);
+  }, []);
 
   const statCards = [
     {

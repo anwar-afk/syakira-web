@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { Link } from "react-router-dom";
 import API_BASE_URL from "../../config/api";
+import { getDocumentations, deleteDocumentation } from "../../services/documentationService";
+import { getErrorMessage } from "../../utils/getErrorMessage";
 // Import Swiper React components
 import { Swiper, SwiperSlide } from "swiper/react";
 // Import Swiper styles
@@ -12,29 +13,25 @@ import "swiper/css/navigation";
 import { Pagination, Navigation } from "swiper/modules";
 
 const DokumentasiPage = () => {
-  const [documentations, setDocumentations] = useState([]); // State untuk menyimpan data dokumentasi
-  const [loading, setLoading] = useState(true); // State untuk loading
-  const [error, setError] = useState(null); // State untuk error
+  const [documentations, setDocumentations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Fetch semua data dokumentasi
   useEffect(() => {
     const fetchDocumentations = async () => {
       try {
-        const response = await axios.get(
-          `${API_BASE_URL}/api/documentations`
-        );
-        setDocumentations(response.data); // Simpan data ke state
-        setLoading(false); // Set loading ke false setelah data diterima
+        const list = await getDocumentations();
+        setDocumentations(list);
+        setLoading(false);
       } catch (err) {
-        setError(err.message); // Tangani error
-        setLoading(false); // Set loading ke false meskipun ada error
+        setError(getErrorMessage(err, "Gagal memuat dokumentasi"));
+        setLoading(false);
       }
     };
 
     fetchDocumentations();
   }, []);
 
-  // Fungsi untuk memformat tanggal
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("id-ID", {
@@ -44,22 +41,13 @@ const DokumentasiPage = () => {
     });
   };
 
-  // Fungsi untuk menghapus dokumentasi
   const handleDeleteDocumentation = async (documentationId) => {
     try {
-      const token = localStorage.getItem("token"); // Ambil token dari localStorage
-      await axios.delete(
-        `${API_BASE_URL}/api/documentations/${documentationId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Tambahkan token ke header
-          },
-        }
-      );
-      // Perbarui state dengan menghapus dokumentasi yang telah dihapus
-      setDocumentations(documentations.filter(doc => doc._id !== documentationId));
+      await deleteDocumentation(documentationId);
+      setDocumentations(documentations.filter((doc) => doc._id !== documentationId));
     } catch (err) {
       console.error("Error deleting documentation:", err);
+      setError(getErrorMessage(err, "Gagal menghapus dokumentasi."));
     }
   };
 

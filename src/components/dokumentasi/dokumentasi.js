@@ -1,24 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { useSpring, animated } from "@react-spring/web";
-import axios from "axios";
 import API_BASE_URL from "../../config/api";
+import { getDocumentations } from "../../services/documentationService";
+import { getErrorMessage } from "../../utils/getErrorMessage";
 
 const Album = () => {
   const [documentations, setDocumentations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch data dokumentasi dari API
   useEffect(() => {
     const fetchDocumentations = async () => {
       try {
-        const response = await axios.get(
-          `${API_BASE_URL}/api/documentations`
-        );
-        setDocumentations(response.data);
+        const list = await getDocumentations();
+        setDocumentations(list);
         setLoading(false);
       } catch (err) {
-        setError(err.message);
+        setError(getErrorMessage(err, "Gagal memuat dokumentasi"));
         setLoading(false);
       }
     };

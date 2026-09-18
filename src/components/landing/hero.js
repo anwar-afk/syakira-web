@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useSpring, animated, useInView } from '@react-spring/web';
-import axios from 'axios';
 import { getCampaigns } from '../../services/campaignService';
+import { getDocumentations } from '../../services/documentationService';
 import API_BASE_URL from '../../config/api';
+import { getErrorMessage } from '../../utils/getErrorMessage';
 
 function FadeInComponent({ children }) {
   const [ref, inView] = useInView({ threshold: 0.2 });
@@ -43,8 +44,8 @@ const Hero1 = () => {
   useEffect(() => {
     const fetchDocumentations = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/documentations`);
-        const pool = response.data.flatMap((doc) =>
+        const docs = await getDocumentations();
+        const pool = docs.flatMap((doc) =>
           doc.images && doc.images.length > 0
             ? doc.images.map((image) => ({ url: image, title: doc.title }))
             : []
@@ -174,12 +175,11 @@ const ProgramKerja = () => {
   useEffect(() => {
     const fetchCampaigns = async () => {
       try {
-        const data = await getCampaigns();
-        const campaignsArray = Array.isArray(data) ? data : data.campaigns || data.data || [];
+        const campaignsArray = await getCampaigns();
         const sortedCampaigns = campaignsArray.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         setCampaigns(sortedCampaigns);
       } catch (err) {
-        setError(err.message || 'Terjadi kesalahan saat mengambil data campaign');
+        setError(getErrorMessage(err, 'Terjadi kesalahan saat mengambil data campaign'));
       } finally {
         setLoading(false);
       }

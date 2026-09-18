@@ -1,115 +1,79 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import ProgramForm from '../../components/admin/JS_programForm'; // Sesuaikan path
+import ProgramForm from '../../components/admin/JS_programForm';
 import API_BASE_URL from '../../config/api';
+import {
+  getCampaigns,
+  createCampaign,
+  updateCampaign,
+  deleteCampaign,
+} from '../../services/campaignService';
+import { getErrorMessage } from '../../utils/getErrorMessage';
 
 const ProgramPage = () => {
-  const [selectedProgram, setSelectedProgram] = useState(null); // Untuk menyimpan program yang dipilih (edit)
-  const [campaigns, setCampaigns] = useState([]); // Untuk menyimpan data campaigns
-  const [modalIsOpen, setModalIsOpen] = useState(false); // State untuk mengontrol modal
-  const [notification, setNotification] = useState(null); // State untuk notifikasi
+  const [selectedProgram, setSelectedProgram] = useState(null);
+  const [campaigns, setCampaigns] = useState([]);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [notification, setNotification] = useState(null);
 
-  // Ambil token dari localStorage
-  const token = localStorage.getItem('token');
+  const showNotification = (message, type) => {
+    setNotification({ message, type });
+    setTimeout(() => {
+      setNotification(null);
+    }, 3000);
+  };
 
-
-  // Fungsi untuk mengambil data campaigns
   const fetchCampaigns = async () => {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/api/campaigns`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Tambahkan token ke header
-          },
-        }
-      );
-      const responseData = response.data;
-      const campaignsArray = Array.isArray(responseData) ? responseData : responseData.campaigns || responseData.data || [];
-      setCampaigns(campaignsArray);
+      const list = await getCampaigns();
+      setCampaigns(list);
     } catch (error) {
       console.error('Error fetching campaigns:', error);
+      showNotification(getErrorMessage(error, 'Gagal memuat program.'), 'error');
     }
   };
 
-  // Ambil data campaigns saat komponen pertama kali di-render
   useEffect(() => {
     fetchCampaigns();
   }, []);
 
-  // Fungsi untuk membuat program baru
   const handleCreateProgram = async (data) => {
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/api/campaigns`,
-        data,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${token}`, // Tambahkan token ke header
-          },
-        }
-      );
-      fetchCampaigns(); // Refresh data campaigns setelah membuat program baru
-      showNotification('Program berhasil dibuat!', 'success'); // Tampilkan notifikasi sukses
-      return response.data;
+      const result = await createCampaign(data);
+      fetchCampaigns();
+      showNotification('Program berhasil dibuat!', 'success');
+      return result;
     } catch (error) {
       console.error('Error creating program:', error);
-      showNotification('Gagal membuat program.', 'error'); // Tampilkan notifikasi error
+      showNotification(getErrorMessage(error, 'Gagal membuat program.'), 'error');
       throw error;
     }
   };
 
-  // Fungsi untuk mengedit program
   const handleUpdateProgram = async (data) => {
     try {
-      const response = await axios.put(
-        `${API_BASE_URL}/api/campaigns/${selectedProgram.id || selectedProgram._id}`,
-        data,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${token}`, // Tambahkan token ke header
-          },
-        }
-      );
-      fetchCampaigns(); // Refresh data campaigns setelah mengedit program
-      setSelectedProgram(null); // Reset selected program setelah update
-      setModalIsOpen(false); // Tutup modal setelah berhasil
-      showNotification('Program berhasil diperbarui!', 'success'); // Tampilkan notifikasi sukses
-      return response.data;
+      const id = selectedProgram.id || selectedProgram._id;
+      const result = await updateCampaign(id, data);
+      fetchCampaigns();
+      setSelectedProgram(null);
+      setModalIsOpen(false);
+      showNotification('Program berhasil diperbarui!', 'success');
+      return result;
     } catch (error) {
       console.error('Error updating program:', error);
-      showNotification('Gagal memperbarui program.', 'error'); // Tampilkan notifikasi error
+      showNotification(getErrorMessage(error, 'Gagal memperbarui program.'), 'error');
       throw error;
     }
   };
 
-  // Fungsi untuk menghapus program
   const handleDeleteProgram = async (campaignId) => {
     try {
-      await axios.delete(
-        `${API_BASE_URL}/api/campaigns/${campaignId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Tambahkan token ke header
-          },
-        }
-      );
-      fetchCampaigns(); // Refresh data campaigns setelah menghapus program
-      showNotification('Program berhasil dihapus!', 'success'); // Tampilkan notifikasi sukses
+      await deleteCampaign(campaignId);
+      fetchCampaigns();
+      showNotification('Program berhasil dihapus!', 'success');
     } catch (error) {
       console.error('Error deleting program:', error);
-      showNotification('Gagal menghapus program.', 'error'); // Tampilkan notifikasi error
+      showNotification(getErrorMessage(error, 'Gagal menghapus program.'), 'error');
     }
-  };
-
-  // Fungsi untuk menampilkan notifikasi
-  const showNotification = (message, type) => {
-    setNotification({ message, type });
-    setTimeout(() => {
-      setNotification(null); // Hapus notifikasi setelah 3 detik
-    }, 3000);
   };
 
   return (

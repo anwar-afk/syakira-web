@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import axios from 'axios';
-import API_BASE_URL from '../../config/api';
+import { createCampaign } from '../../services/campaignService';
+import { getErrorMessage } from '../../utils/getErrorMessage';
 
 const CreateProgram = () => {
   const [formData, setFormData] = useState({
@@ -10,12 +10,11 @@ const CreateProgram = () => {
     startDate: '',
     endDate: '',
     target: '',
-    images: [], // Menyimpan file gambar yang dipilih
+    images: [],
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Fungsi untuk mengubah input teks
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -24,24 +23,19 @@ const CreateProgram = () => {
     });
   };
 
-  // Fungsi untuk mengubah input file (gambar)
   const handleFileChange = (e) => {
-    // Ambil semua file yang dipilih
     const files = Array.from(e.target.files);
-    console.log('Files selected:', files); // Debugging: Cek file yang dipilih
     setFormData({
       ...formData,
-      images: files, // Simpan file-file yang dipilih ke state
+      images: files,
     });
   };
 
-  // Fungsi untuk mengirim data ke backend
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    // Buat objek FormData untuk mengirim file
     const data = new FormData();
     data.append('title', formData.title);
     data.append('detail', formData.detail);
@@ -50,29 +44,14 @@ const CreateProgram = () => {
     data.append('endDate', formData.endDate);
     data.append('target', formData.target);
 
-    // Tambahkan semua file gambar ke FormData
-    formData.images.forEach((image, index) => {
-      data.append('images', image); // Gunakan 'images' sebagai key untuk backend
+    formData.images.forEach((image) => {
+      data.append('images', image);
     });
 
-    console.log('FormData to be sent:', data); // Debugging: Cek FormData sebelum dikirim
-
     try {
-      // Kirim data ke backend
-      const response = await axios.post(
-        `${API_BASE_URL}/api/campaigns`,
-        data,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data', // Penting untuk mengirim file
-          },
-        }
-      );
-
-      console.log('Response:', response.data);
+      await createCampaign(data);
       alert('Program berhasil dibuat!');
 
-      // Reset form setelah berhasil
       setFormData({
         title: '',
         detail: '',
@@ -83,7 +62,7 @@ const CreateProgram = () => {
         images: [],
       });
     } catch (err) {
-      setError('Gagal membuat program. Silakan coba lagi.');
+      setError(getErrorMessage(err, 'Gagal membuat program. Silakan coba lagi.'));
       console.error('Error:', err);
     } finally {
       setLoading(false);

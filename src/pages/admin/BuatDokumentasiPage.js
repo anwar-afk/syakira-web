@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import API_BASE_URL from "../../config/api";
+import { createDocumentation } from "../../services/documentationService";
+import { getErrorMessage } from "../../utils/getErrorMessage";
 
 const BuatDokumentasiPage = () => {
   const [title, setTitle] = useState("");
@@ -37,25 +37,14 @@ const BuatDokumentasiPage = () => {
         formData.append("images", image);
       });
 
-      const token = localStorage.getItem("token");
-      const response = await axios.post(
-        `${API_BASE_URL}/api/documentations`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      await createDocumentation(formData);
 
       setSuccess(true);
-      console.log("Dokumentasi berhasil dibuat:", response.data);
       setTimeout(() => {
-        navigate("/admin/dokumentasi"); // Redirect ke halaman dokumentasi setelah berhasil
+        navigate("/admin/dokumentasi");
       }, 2000);
     } catch (err) {
-      setError(err.response?.data?.message || "Terjadi kesalahan saat membuat dokumentasi.");
+      setError(getErrorMessage(err, "Terjadi kesalahan saat membuat dokumentasi."));
       console.error("Error creating documentation:", err);
     } finally {
       setLoading(false);

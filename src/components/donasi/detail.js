@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useSpring, animated } from '@react-spring/web';
-import { getCampaigns } from '../../services/campaignService';
+import { getCampaignById } from '../../services/campaignService';
 import { AuthContext } from '../../context/AuthContext';
 import { createDonation, getDonationHistory } from '../../services/donateService';
 import API_BASE_URL from '../../config/api';
+import { getErrorMessage } from '../../utils/getErrorMessage';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -17,7 +18,7 @@ const DonationDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [donationHistory, setDonationHistory] = useState([]);
-  const { user } = useContext(AuthContext);
+  const { user, isAuthenticated } = useContext(AuthContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ amount: '', name: '', email: '' });
   const [donationError, setDonationError] = useState(null);
@@ -28,43 +29,35 @@ const DonationDetailPage = () => {
     config: { duration: 1000 },
   });
 
-  // Ambil data campaign dan riwayat donasi saat komponen dimuat
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
+      setError(null);
       try {
-        // 1. Ambil data campaign
-        const campaignData = await getCampaigns();
-        const campaignsArray = Array.isArray(campaignData) ? campaignData : campaignData.campaigns || campaignData.data || [];
-        
-        // Perbaikan: Pastikan tipe data ID sama (String) saat dibandingkan
-        const selectedCampaign = campaignsArray.find((campaign) => String(campaign._id) === String(id));
-        
-        if (selectedCampaign) {
-          setCampaign(selectedCampaign);
-        } else {
-          setError("Data campaign tidak ditemukan.");
-        }
-      } catch (error) {
-        console.error("Error fetching campaign data:", error);
-        setError("Gagal memuat data campaign.");
+        const selectedCampaign = await getCampaignById(id);
+        setCampaign(selectedCampaign);
+      } catch (err) {
+        console.error("Error fetching campaign data:", err);
+        setError(getErrorMessage(err, "Gagal memuat data campaign."));
+        setCampaign(null);
       } finally {
         setLoading(false);
       }
 
-      // 2. Ambil riwayat donasi (dipisah agar jika error, halaman utama tidak crash)
-      if (user) {
+      if (isAuthenticated) {
         try {
           const historyData = await getDonationHistory();
           setDonationHistory(historyData);
         } catch (historyError) {
           console.error("Error fetching donation history:", historyError);
         }
+      } else {
+        setDonationHistory([]);
       }
     };
 
     fetchData();
-  }, [id, user]);
+  }, [id, isAuthenticated]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -88,7 +81,7 @@ const DonationDetailPage = () => {
       return;
     }
 
-    if (!user && (!formData.name.trim() || !formData.email.trim())) {
+    if (!isAuthenticated && (!formData.name.trim() || !formData.email.trim())) {
       setDonationError("Masukkan nama dan email untuk melanjutkan donasi.");
       return;
     }
@@ -96,8 +89,12 @@ const DonationDetailPage = () => {
     try {
       const donationPayload = {
         amount: formData.amount,
-        name: user ? user.username : formData.name.trim(),
-        email: user ? user.username : formData.email.trim(),
+        name: isAuthenticated
+          ? (user?.name || user?.username || formData.name.trim())
+          : formData.name.trim(),
+        email: isAuthenticated
+          ? (user?.email || formData.email.trim())
+          : formData.email.trim(),
       };
 
       const response = await createDonation(id, donationPayload);
@@ -107,8 +104,7 @@ const DonationDetailPage = () => {
         setDonationError("Gagal membuat donasi. Silakan coba lagi.");
       }
     } catch (error) {
-      console.error("Error creating donation:", error);
-      setDonationError(error.message || "Terjadi kesalahan saat membuat donasi.");
+      setDonationError(getErrorMessage(error, "Terjadi kesalahan saat membuat donasi."));
     }
   };
 
@@ -211,7 +207,7 @@ const DonationDetailPage = () => {
         <section className="mt-12">
           <h3 className="text-2xl font-bold text-gray-800">Riwayat Donasi</h3>
           <div className="mt-6 space-y-6">
-            {user ? (
+            {isAuthenticated ? (
               donationHistory.filter((donation) => donation.paymentStatus === 'success').length > 0 ? (
                 donationHistory
                   .filter((donation) => donation.paymentStatus === 'success')
@@ -286,7 +282,7 @@ const DonationDetailPage = () => {
                   placeholder="Masukkan nominal sendiri"
                 />
               </div>
-              {!user && (
+              {!isAuthenticated && (
                 <>
                   <div className="mb-5">
                     <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="name">

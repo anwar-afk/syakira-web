@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
 const Navbar = () => {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout, isGuest } = useContext(AuthContext);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
 
@@ -66,7 +66,9 @@ const Navbar = () => {
         <div className="hidden lg:flex items-center space-x-2 pr-1">
           {user ? (
             <div className="flex items-center space-x-3">
-              <span className="text-sm font-medium text-gray-700 px-2">{user.username}</span>
+              <span className="text-sm font-medium text-gray-700 px-2">
+                {isGuest ? 'Tamu' : user.username}
+              </span>
               <button
                 onClick={handleLogout}
                 className="px-5 py-2.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-full transition-all duration-200"
@@ -128,7 +130,9 @@ const Navbar = () => {
           
           {user ? (
             <div className="flex flex-col space-y-2">
-              <span className="px-4 py-2 text-sm font-medium text-gray-700 text-center">Hi, {user.username}</span>
+              <span className="px-4 py-2 text-sm font-medium text-gray-700 text-center">
+                Hi, {isGuest ? 'Tamu' : user.username}
+              </span>
               <button
                 onClick={handleLogout}
                 className="w-full px-4 py-3 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-2xl transition-colors text-center"

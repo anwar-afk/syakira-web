@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { register } from '../services/authService';
+import { getErrorMessage } from '../utils/getErrorMessage';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -13,14 +14,17 @@ const RegisterPage = () => {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError('Password tidak cocok');
       return;
     }
+    setSubmitting(true);
     try {
       await register({
         name: formData.name,
@@ -30,7 +34,9 @@ const RegisterPage = () => {
       });
       navigate('/login');
     } catch (err) {
-      setError(err.message || 'Terjadi kesalahan saat registrasi');
+      setError(getErrorMessage(err, 'Terjadi kesalahan saat registrasi'));
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -39,11 +45,11 @@ const RegisterPage = () => {
       ...formData,
       [e.target.name]: e.target.value,
     });
+    if (error) setError('');
   };
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-green-50">
-      {/* Image Section */}
       <div className="w-full md:w-1/2 bg-green-50 flex items-center justify-center p-6 md:p-0">
         <img
           src="/image/register-image.png"
@@ -52,11 +58,20 @@ const RegisterPage = () => {
         />
       </div>
 
-      {/* Form Section */}
       <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
           Please Fill out form to Register!
         </h2>
+
+        {error && (
+          <div
+            role="alert"
+            className="mb-4 w-full max-w-md rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          >
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4">
           <input
             type="text"
@@ -99,6 +114,7 @@ const RegisterPage = () => {
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+              aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
             >
               {showPassword ? (
                 <i className="far fa-eye-slash"></i>
@@ -121,6 +137,7 @@ const RegisterPage = () => {
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+              aria-label={showConfirmPassword ? 'Sembunyikan password' : 'Tampilkan password'}
             >
               {showConfirmPassword ? (
                 <i className="far fa-eye-slash"></i>
@@ -131,9 +148,10 @@ const RegisterPage = () => {
           </div>
           <button
             type="submit"
-            className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 focus:ring focus:ring-green-500"
+            disabled={submitting}
+            className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 focus:ring focus:ring-green-500 disabled:opacity-60"
           >
-            Register
+            {submitting ? 'Mendaftar...' : 'Register'}
           </button>
         </form>
         <p className="mt-4 text-sm text-gray-600">

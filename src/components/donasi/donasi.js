@@ -115,8 +115,7 @@ export const DonasiContent = () => {
   useEffect(() => {
     const fetchCampaigns = async () => {
       try {
-        const data = await getCampaigns();
-        const campaignsArray = Array.isArray(data) ? data : data.campaigns || data.data || [];
+        const campaignsArray = await getCampaigns();
         // Sortir campaign terbaru di atas
         const sortedCampaigns = campaignsArray.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         setCampaigns(sortedCampaigns);
